@@ -5,12 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>El Jet del Evangelio Web-Tv - En Vivo</title>
   
-  <!-- Iconos para botones -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Librería CDN de banderas -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
-
   <style>
     * {
       box-sizing: border-box;
@@ -63,7 +57,7 @@
       gap: 1.5rem;
     }
 
-    /* Banner personalizado en CSS */
+    /* Banner principal en CSS puro */
     .banner-header {
       width: 100%;
       background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%);
@@ -84,7 +78,7 @@
       margin-bottom: 1.2rem;
     }
 
-    /* Estilo de la lista de banderas */
+    /* Banderas mediante emojis nativos */
     .flags-container {
       display: flex;
       flex-wrap: wrap;
@@ -95,22 +89,18 @@
     .flag-item {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(4px);
-      padding: 4px 10px;
+      padding: 6px 12px;
       border-radius: 20px;
       border: 1px solid rgba(255, 255, 255, 0.25);
-      transition: transform 0.2s, background 0.2s;
+      font-size: 1.3rem;
+      line-height: 1;
+      transition: transform 0.2s;
     }
     .flag-item:hover {
       transform: translateY(-2px);
       background: rgba(255, 255, 255, 0.25);
-    }
-    .flag-item span.fi {
-      width: 1.4em;
-      height: 1.05em;
-      border-radius: 2px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
     }
 
     /* Contenedor del video */
@@ -129,7 +119,7 @@
       border: none;
     }
 
-    /* Tarjeta de redes sociales */
+    /* Tarjeta de información y botones */
     .info-card {
       width: 100%;
       background-color: #1e293b;
@@ -150,7 +140,7 @@
     .social-btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       padding: 12px 20px;
       border-radius: 8px;
       color: white;
@@ -159,4 +149,39 @@
       font-size: 0.95rem;
       transition: transform 0.2s, opacity 0.2s;
     }
-    .social-btn:hover
+    .social-btn:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
+
+    .btn-radio { background-color: #0284c7; }
+    .btn-youtube { background-color: #ff0000; }
+    .btn-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: #64748b;
+      font-size: 0.85rem;
+      border-top: 1px solid #334155;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-container">
+      <h1>✈️ El Jet del Evangelio Web-Tv</h1>
+    </div>
+    <span class="live-badge">EN VIVO</span>
+  </header>
+
+  <main>
+    <!-- Banner Principal -->
+    <div class="banner-header">
+      <h2>✈️ El Jet del Evangelio Web-Tv</h2>
+      <p>Llevando el mensaje de fe, esperanza y alabanza a todas las naciones</p>
+      
+      <!-- Banderas con Emojis Nativos (Carga instantánea) -->
+      <div class="flags
