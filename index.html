@@ -17,30 +17,74 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
+    :root {
+      --bg-color: #0f172a;
+      --header-bg: #1e293b;
+      --card-bg: #1e293b;
+      --text-color: #f8fafc;
+      --text-muted: #e0f2fe;
+      --border-color: #334155;
+      --accent-color: #38bdf8;
+    }
+
+    /* Estilos del Modo Claro */
+    body.light-mode {
+      --bg-color: #f1f5f9;
+      --header-bg: #ffffff;
+      --card-bg: #ffffff;
+      --text-color: #0f172a;
+      --text-muted: #1e293b;
+      --border-color: #cbd5e1;
+      --accent-color: #0284c7;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
     body {
-      background-color: #0f172a;
-      color: #f8fafc;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      transition: background-color 0.3s, color 0.3s;
     }
     header {
-      background-color: #1e293b;
+      background-color: var(--header-bg);
       padding: 1rem 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #334155;
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color 0.3s;
     }
     .logo-container h1 {
       font-size: 1.3rem;
-      color: #ffffff;
+      color: var(--text-color);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .theme-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background-color 0.2s;
+    }
+    .theme-toggle-btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
     }
     .live-badge {
       background-color: #ef4444;
@@ -116,7 +160,7 @@
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-      border: 1px solid #334155;
+      border: 1px solid var(--border-color);
     }
     iframe {
       width: 100%;
@@ -152,14 +196,15 @@
     /* Tarjetas de información */
     .info-card {
       width: 100%;
-      background-color: #1e293b;
+      background-color: var(--card-bg);
       padding: 1.5rem;
       border-radius: 12px;
-      border: 1px solid #334155;
+      border: 1px solid var(--border-color);
+      transition: background-color 0.3s, border-color 0.3s;
     }
     .info-card h3 {
       font-size: 1.1rem;
-      color: #38bdf8;
+      color: var(--accent-color);
       margin-bottom: 1rem;
     }
     .social-buttons {
@@ -190,18 +235,18 @@
 
     /* Versículo del Día */
     .verse-card {
-      border-left: 4px solid #38bdf8;
+      border-left: 4px solid var(--accent-color);
     }
     .verse-text {
       font-style: italic;
       font-size: 1.05rem;
       line-height: 1.5;
-      color: #f1f5f9;
+      color: var(--text-color);
       margin-bottom: 0.75rem;
     }
     .verse-ref {
       font-size: 0.9rem;
-      color: #38bdf8;
+      color: var(--accent-color);
       font-weight: 600;
       display: block;
       text-align: right;
@@ -212,7 +257,7 @@
       padding: 1.5rem;
       color: #64748b;
       font-size: 0.85rem;
-      border-top: 1px solid #334155;
+      border-top: 1px solid var(--border-color);
       margin-top: auto;
     }
   </style>
@@ -223,7 +268,12 @@
     <div class="logo-container">
       <h1>✈️ El Jet del Evangelio Web-Tv</h1>
     </div>
-    <span class="live-badge">EN VIVO</span>
+    <div class="header-actions">
+      <button id="themeToggle" class="theme-toggle-btn" aria-label="Cambiar tema">
+        <span id="themeIcon">🌙</span> <span id="themeText">Oscuro</span>
+      </button>
+      <span class="live-badge">EN VIVO</span>
+    </div>
   </header>
 
   <main>
@@ -285,6 +335,34 @@
   </footer>
 
   <script>
+    // Lógica del Conmutador Modo Nocturno / Claro
+    const themeToggleBtn = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeText = document.getElementById('themeText');
+
+    function aplicarTema(tema) {
+      if (tema === 'light') {
+        document.body.classList.add('light-mode');
+        themeIcon.innerText = '☀️';
+        themeText.innerText = 'Claro';
+      } else {
+        document.body.classList.remove('light-mode');
+        themeIcon.innerText = '🌙';
+        themeText.innerText = 'Oscuro';
+      }
+    }
+
+    // Cargar preferencia previa
+    const temaGuardado = localStorage.getItem('theme') || 'dark';
+    aplicarTema(temaGuardado);
+
+    themeToggleBtn.addEventListener('click', () => {
+      const esClaro = document.body.classList.contains('light-mode');
+      const nuevoTema = esClaro ? 'dark' : 'light';
+      localStorage.setItem('theme', nuevoTema);
+      aplicarTema(nuevoTema);
+    });
+
     // Configuración de instalación de PWA
     let deferredPrompt;
     const btnInstall = document.getElementById('btnInstall');
