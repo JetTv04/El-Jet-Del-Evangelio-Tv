@@ -210,7 +210,6 @@
 
     .audio-mode-card.active { display: block; }
 
-    /* Ventana de Contadores */
     .counters-window {
       width: 100%;
       background-color: var(--card-bg);
@@ -298,7 +297,6 @@
       border: 1px solid var(--border-color);
     }
 
-    /* Historial del Chat */
     .chat-history {
       max-height: 250px;
       overflow-y: auto;
@@ -642,15 +640,41 @@
       }
     });
 
-    // Cambios de Transmisión Especial desde Admin
+    // Escuchador optimizado para Transmisión Especial (Facebook, YouTube, OK.ru)
     db.ref('transmision_especial').on('value', snapshot => {
       const data = snapshot.val();
       const iframe = document.getElementById('videoIframe');
+      if (!iframe) return;
+
       if (data && data.activo && data.embedUrl) {
-        if (iframe.src !== data.embedUrl) iframe.src = data.embedUrl;
+        let url = data.embedUrl.trim();
+
+        // 1. Extrae la URL si se pegó el código iframe HTML por error
+        if (url.includes('src=')) {
+          const match = url.match(/src=["']([^"']+)["']/);
+          if (match && match[1]) url = match[1];
+        }
+
+        // 2. Convierte enlaces estándar de YouTube a Embed
+        if (url.includes('youtube.com/watch?v=')) {
+          url = url.replace('watch?v=', 'embed/');
+        } else if (url.includes('youtu.be/')) {
+          url = url.replace('youtu.be/', 'www.youtube.com/embed/');
+        }
+
+        // 3. Limpia entidades HTML (&amp; -> &)
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = url;
+        url = tempDiv.innerText;
+
+        if (iframe.src !== url) {
+          iframe.src = url;
+        }
       } else {
         const defaultUrl = "https://ok.ru/videoembed/16493078060749?nochat=1&autoplay=1";
-        if (iframe.src !== defaultUrl) iframe.src = defaultUrl;
+        if (iframe.src !== defaultUrl) {
+          iframe.src = defaultUrl;
+        }
       }
     });
 
@@ -719,7 +743,6 @@
     // Overlay Unmute
     document.getElementById('unmuteOverlay').addEventListener('click', function() {
       this.classList.add('hidden');
-      document.getElementById('videoIframe').src = "https://ok.ru/videoembed/16493078060749?nochat=1&autoplay=1";
     });
 
     // Conmutadores de Modo Audio y Tema
