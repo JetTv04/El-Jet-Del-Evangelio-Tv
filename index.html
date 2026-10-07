@@ -98,7 +98,7 @@
       flex-wrap: wrap;
     }
 
-    /* Botones de acción (Instalar / Notificaciones) */
+    /* Botones de acción */
     .action-btn {
       display: inline-block;
       color: white;
@@ -271,18 +271,37 @@
       }
     });
 
-    // Función para solicitar permisos de notificación manualmente
+    // Registrar Service Worker de Webpushr
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./webpushr-sw.js').then(function() {
+        console.log('Webpushr SW registrado correctamente');
+      }).catch(function(err) {
+        console.log('Error al registrar SW:', err);
+      });
+    }
+
+    // Solicitud forzada de permisos
     function requestNotificationPermission() {
-      if ('webpushr' in window) {
-        webpushr('prompt');
-      } else if (Notification.permission !== 'granted') {
-        Notification.requestPermission().then(permission => {
-          if (permission === 'granted') {
-            alert('¡Notificaciones activadas correctamente!');
+      if (!("Notification" in window)) {
+        alert("Tu navegador no soporta notificaciones.");
+        return;
+      }
+
+      if (Notification.permission === "granted") {
+        alert("¡Ya tienes las notificaciones activadas!");
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then(function (permission) {
+          if (permission === "granted") {
+            alert("¡Gracias! Notificaciones activadas con éxito.");
+            if (typeof webpushr === 'function') {
+              webpushr('prompt');
+            }
+          } else {
+            alert("Permiso denegado. Puedes activarlo desde la configuración de tu navegador.");
           }
         });
       } else {
-        alert('Ya tienes las notificaciones activadas.');
+        alert("Las notificaciones están bloqueadas en tu navegador. Haz clic en el icono del candado 🔒 junto a la URL para permitir notificaciones.");
       }
     }
   </script>
