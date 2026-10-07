@@ -140,3 +140,235 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
+    }
+
+    .amen-btn { background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%); }
+    .plane-btn { background: linear-gradient(135deg, #0284c7 0%, #10b981 100%); }
+
+    .action-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .flying-plane {
+      position: fixed;
+      bottom: -50px;
+      font-size: 2.5rem;
+      user-select: none;
+      pointer-events: none;
+      z-index: 9999;
+      animation: flyUp 2s ease-out forwards;
+    }
+
+    @keyframes flyUp {
+      0% { transform: translateY(0) scale(0.6); opacity: 1; }
+      100% { transform: translateY(-110vh) scale(1.3); opacity: 0; }
+    }
+
+    .info-card {
+      width: 100%;
+      background-color: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .info-card h3 { font-size: 1.1rem; color: var(--accent-color); margin-bottom: 1rem; }
+
+    .social-buttons { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 12px 20px;
+      border-radius: 8px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .btn-radio { background-color: #0284c7; }
+    .btn-youtube { background-color: #ff0000; }
+    .btn-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+
+    .verse-card { border-left: 4px solid var(--accent-color); }
+    .verse-text { font-style: italic; margin-bottom: 0.5rem; }
+    .verse-ref { font-size: 0.9rem; color: var(--accent-color); font-weight: 600; text-align: right; display: block; }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: #64748b;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border-color);
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-container">
+      <h1>✈️ El Jet del Evangelio Web-Tv</h1>
+    </div>
+    <div class="header-actions">
+      <button id="themeToggle" class="theme-toggle-btn">
+        <span id="themeIcon">🌙</span> <span id="themeText">Oscuro</span>
+      </button>
+      <span class="live-badge">EN VIVO</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="banner-header">
+      <h2>✈️ El Jet del Evangelio Web-Tv</h2>
+      <p>Llevando el mensaje de fe, esperanza y alabanza a todas las naciones</p>
+      <button id="btnInstall" class="install-btn" style="display: none;">📲 Instalar Aplicación Web</button>
+    </div>
+
+    <div class="video-wrapper">
+      <iframe src="https://ok.ru/videoembed/16493078060749?nochat=1&autoplay=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+    </div>
+
+    <div class="interaction-container">
+      <button id="btnAmen" class="action-btn amen-btn">
+        🙌 <span id="txtAmen">¡Decir Amén!</span>
+      </button>
+
+      <button id="btnPlane" class="action-btn plane-btn">
+        ✈️ <span id="txtPlane">Lanzar Jet</span>
+      </button>
+    </div>
+
+    <div class="info-card">
+      <h3>Nuestros Canales y Aplicaciones:</h3>
+      <div class="social-buttons">
+        <a href="https://playstore.stream/app/dcc09dbfcac88017?app-multi=1776608278&instalado=sim" target="_blank" class="social-btn btn-radio">📻 Escuchar Radio Jet</a>
+        <a href="https://www.youtube.com/@radioeljetdelevangelio" target="_blank" class="social-btn btn-youtube">▶️ Canal de YouTube</a>
+        <a href="https://www.instagram.com/carolpaz820" target="_blank" class="social-btn btn-instagram">📸 Instagram</a>
+      </div>
+    </div>
+
+    <div class="info-card verse-card">
+      <h3>📖 Versículo del Día</h3>
+      <p class="verse-text" id="verse-text">Cargando versículo...</p>
+      <span class="verse-ref" id="verse-ref"></span>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2026 El Jet del Evangelio Web-Tv — Todos los derechos reservados.
+  </footer>
+
+  <script>
+    const themeToggleBtn = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeText = document.getElementById('themeText');
+
+    function aplicarTema(tema) {
+      if (tema === 'light') {
+        document.body.classList.add('light-mode');
+        themeIcon.innerText = '☀️';
+        themeText.innerText = 'Claro';
+      } else {
+        document.body.classList.remove('light-mode');
+        themeIcon.innerText = '🌙';
+        themeText.innerText = 'Oscuro';
+      }
+    }
+
+    aplicarTema(localStorage.getItem('theme') || 'dark');
+
+    themeToggleBtn.addEventListener('click', () => {
+      const nuevoTema = document.body.classList.contains('light-mode') ? 'dark' : 'light';
+      localStorage.setItem('theme', nuevoTema);
+      aplicarTema(nuevoTema);
+    });
+
+    function aplicarCooldown(btn, txtElement, textoOriginal, ms = 2500) {
+      btn.disabled = true;
+      let restante = (ms / 1000).toFixed(1);
+      txtElement.innerText = `Espera ${restante}s...`;
+
+      const intervalo = setInterval(() => {
+        restante = (restante - 0.5).toFixed(1);
+        if (restante > 0) txtElement.innerText = `Espera ${restante}s...`;
+      }, 500);
+
+      setTimeout(() => {
+        clearInterval(intervalo);
+        btn.disabled = false;
+        txtElement.innerText = textoOriginal;
+      }, ms);
+    }
+
+    const btnAmen = document.getElementById('btnAmen');
+    const txtAmen = document.getElementById('txtAmen');
+
+    btnAmen.addEventListener('click', () => {
+      if (btnAmen.disabled) return;
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.7 } });
+      }
+      aplicarCooldown(btnAmen, txtAmen, '¡Decir Amén!');
+    });
+
+    const btnPlane = document.getElementById('btnPlane');
+    const txtPlane = document.getElementById('txtPlane');
+
+    btnPlane.addEventListener('click', () => {
+      if (btnPlane.disabled) return;
+      for (let i = 0; i < 6; i++) {
+        setTimeout(() => {
+          const plane = document.createElement('div');
+          plane.classList.add('flying-plane');
+          plane.innerText = '✈️';
+          plane.style.left = `${Math.random() * 80 + 10}%`;
+          document.body.appendChild(plane);
+          setTimeout(() => plane.remove(), 2000);
+        }, i * 150);
+      }
+      aplicarCooldown(btnPlane, txtPlane, 'Lanzar Jet');
+    });
+
+    function obtenerDiaDelAno() {
+      const ahora = new Date();
+      const inicioAño = new Date(ahora.getFullYear(), 0, 0);
+      const dif = ahora - inicioAño;
+      const unDia = 1000 * 60 * 60 * 24;
+      return Math.floor(dif / unDia);
+    }
+
+    async function cargarVersiculoDesdeArchivo() {
+      const textElem = document.getElementById('verse-text');
+      const refElem = document.getElementById('verse-ref');
+
+      try {
+        const respuesta = await fetch('versiculos.txt');
+        if (!respuesta.ok) throw new Error('No se pudo cargar versiculos.txt');
+
+        const contenido = await respuesta.text();
+        const lineas = contenido.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+        if (lineas.length === 0) throw new Error('El archivo está vacío');
+
+        const diaDelAno = obtenerDiaDelAno();
+        const indice = (diaDelAno - 1) % lineas.length;
+
+        const [texto, cita] = lineas[indice].split('|');
+
+        textElem.innerText = `"${texto ? texto.trim() : ''}"`;
+        refElem.innerText = `— ${cita ? cita.trim() : ''} (RVR1960)`;
+
+      } catch (error) {
+        console.error('Error al cargar versículos:', error);
+        textElem.innerText = '"Seguid la paz con todos, y la santidad, sin la cual nadie verá al Señor."';
+        refElem.innerText = '— Hebreos 12:14 (RVR1960)';
+      }
+    }
+
+    cargarVersiculoDesdeArchivo();
+  </script>
+
+</body>
+</html>
