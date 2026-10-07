@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>El Jet del Evangelio Web-Tv - En Vivo</title>
+  
+  <!-- Enlace al Manifest para PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e293b">
 
   <style>
     * {
@@ -57,7 +61,7 @@
       gap: 1.5rem;
     }
 
-    /* Banner personalizado en CSS */
+    /* Banner personalizado */
     .banner-header {
       width: 100%;
       background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%);
@@ -75,6 +79,26 @@
     .banner-header p {
       color: #e0f2fe;
       font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Botón de Instalar PWA */
+    .install-btn {
+      display: inline-block;
+      background-color: #22c55e;
+      color: white;
+      font-weight: bold;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    .install-btn:hover {
+      background-color: #16a34a;
+      transform: translateY(-2px);
     }
 
     /* Contenedor del video */
@@ -128,7 +152,6 @@
       opacity: 0.9;
     }
 
-    /* Colores botones */
     .btn-radio { background-color: #0284c7; }
     .btn-youtube { background-color: #ff0000; }
     .btn-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
@@ -153,10 +176,15 @@
   </header>
 
   <main>
-    <!-- Banner Principal -->
+    <!-- Banner Principal con opción de instalación -->
     <div class="banner-header">
       <h2>✈️ El Jet del Evangelio Web-Tv</h2>
       <p>Llevando el mensaje de fe, esperanza y alabanza a todas las naciones</p>
+      
+      <!-- Botón dinámico de instalación -->
+      <button id="btnInstall" class="install-btn" style="display: none;">
+        📲 Instalar Aplicación Web
+      </button>
     </div>
 
     <!-- Reproductor de video OK.ru -->
@@ -172,17 +200,14 @@
     <div class="info-card">
       <h3>Nuestros Canales y Aplicaciones:</h3>
       <div class="social-buttons">
-        <!-- Radio Jet -->
         <a href="https://playstore.stream/app/dcc09dbfcac88017?app-multi=1776608278&instalado=sim" target="_blank" class="social-btn btn-radio">
           📻 Escuchar Radio Jet
         </a>
         
-        <!-- YouTube -->
         <a href="https://www.youtube.com/@radioeljetdelevangelio" target="_blank" class="social-btn btn-youtube">
           ▶️ Canal de YouTube
         </a>
 
-        <!-- Instagram -->
         <a href="https://www.instagram.com/carolpaz820" target="_blank" class="social-btn btn-instagram">
           📸 Instagram
         </a>
@@ -193,6 +218,34 @@
   <footer>
     &copy; 2026 El Jet del Evangelio Web-Tv — Todos los derechos reservados.
   </footer>
+
+  <!-- Script para habilitar la instalación de la App -->
+  <script>
+    let deferredPrompt;
+    const btnInstall = document.getElementById('btnInstall');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      btnInstall.style.display = 'inline-block';
+    });
+
+    btnInstall.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          btnInstall.style.display = 'none';
+        }
+        deferredPrompt = null;
+      }
+    });
+
+    // Registrar Service Worker básico
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('data:text/javascript,console.log("PWA Service Worker listo");');
+    }
+  </script>
 
 </body>
 </html>
