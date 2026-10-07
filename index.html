@@ -27,7 +27,6 @@
       --accent-color: #38bdf8;
     }
 
-    /* Estilos del Modo Claro */
     body.light-mode {
       --bg-color: #f1f5f9;
       --header-bg: #ffffff;
@@ -43,6 +42,7 @@
       margin: 0;
       padding: 0;
     }
+
     body {
       background-color: var(--bg-color);
       color: var(--text-color);
@@ -53,6 +53,7 @@
       transition: background-color 0.3s, color 0.3s;
       overflow-x: hidden;
     }
+
     header {
       background-color: var(--header-bg);
       padding: 1rem 1.5rem;
@@ -62,15 +63,18 @@
       border-bottom: 1px solid var(--border-color);
       transition: background-color 0.3s;
     }
+
     .logo-container h1 {
       font-size: 1.3rem;
       color: var(--text-color);
     }
+
     .header-actions {
       display: flex;
       align-items: center;
       gap: 10px;
     }
+
     .theme-toggle-btn {
       background: transparent;
       border: 1px solid var(--border-color);
@@ -84,9 +88,11 @@
       gap: 5px;
       transition: background-color 0.2s;
     }
+
     .theme-toggle-btn:hover {
       background-color: rgba(255, 255, 255, 0.1);
     }
+
     .live-badge {
       background-color: #ef4444;
       color: white;
@@ -96,11 +102,13 @@
       border-radius: 4px;
       animation: pulse 2s infinite;
     }
+
     @keyframes pulse {
       0% { opacity: 1; }
       50% { opacity: 0.5; }
       100% { opacity: 1; }
     }
+
     main {
       flex: 1;
       display: flex;
@@ -113,7 +121,6 @@
       gap: 1.5rem;
     }
 
-    /* Banner personalizado */
     .banner-header {
       width: 100%;
       background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%);
@@ -123,151 +130,14 @@
       border: 1px solid #38bdf8;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     }
+
     .banner-header h2 {
       font-size: 1.8rem;
       color: #ffffff;
       margin-bottom: 0.5rem;
     }
+
     .banner-header p {
       color: #e0f2fe;
       font-size: 1rem;
       margin-bottom: 1rem;
-    }
-
-    /* Botón de Instalar PWA */
-    .install-btn {
-      display: inline-block;
-      background-color: #22c55e;
-      color: white;
-      font-weight: bold;
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-size: 0.95rem;
-      box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
-      transition: transform 0.2s, background-color 0.2s;
-    }
-    .install-btn:hover {
-      background-color: #16a34a;
-      transform: translateY(-2px);
-    }
-
-    /* Contenedor del video */
-    .video-wrapper {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      background-color: #000;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-      border: 1px solid var(--border-color);
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    /* Botones Interactivos de Celebración y Avión */
-    .interaction-container {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-    .action-btn {
-      color: white;
-      font-weight: bold;
-      font-size: 1.05rem;
-      padding: 14px 24px;
-      border-radius: 50px;
-      border: none;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .amen-btn {
-      background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
-      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
-    }
-    .plane-btn {
-      background: linear-gradient(135deg, #0284c7 0%, #10b981 100%);
-      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-    }
-    .action-btn:hover:not(:disabled) {
-      transform: scale(1.05);
-    }
-    .action-btn:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-      filter: grayscale(30%);
-    }
-
-    /* Animación del Avión CSS */
-    .flying-plane {
-      position: fixed;
-      bottom: -50px;
-      font-size: 2.5rem;
-      user-select: none;
-      pointer-events: none;
-      z-index: 9999;
-      animation: flyUp 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-    }
-
-    @keyframes flyUp {
-      0% {
-        transform: translateY(0) scale(0.6) rotate(-10deg);
-        opacity: 1;
-      }
-      70% {
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-110vh) scale(1.4) rotate(15deg);
-        opacity: 0;
-      }
-    }
-
-    /* Tarjetas de información */
-    .info-card {
-      width: 100%;
-      background-color: var(--card-bg);
-      padding: 1.5rem;
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-      transition: background-color 0.3s, border-color 0.3s;
-    }
-    .info-card h3 {
-      font-size: 1.1rem;
-      color: var(--accent-color);
-      margin-bottom: 1rem;
-    }
-    .social-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .social-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 20px;
-      border-radius: 8px;
-      color: white;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: transform 0.2s, opacity 0.2s;
-    }
-    .social-btn:hover {
-      transform: translateY(-2px);
-      opacity: 0.9;
-    }
-
-    .btn-radio { background-color: #0284c7; }
-    .btn-youtube { background-color: #ff0000; }
-    .btn-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc236
