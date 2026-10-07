@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>El Jet del Evangelio Web-Tv - En Vivo</title>
   
-  <!-- Enlace al Manifest para PWA -->
+  <!-- Icono del navegador y PWA -->
+  <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Plane_icon_font_awesome.svg/512px-Plane_icon_font_awesome.svg.png">
+  <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Plane_icon_font_awesome.svg/512px-Plane_icon_font_awesome.svg.png">
+  
+  <!-- Manifest para PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1e293b">
 
@@ -176,12 +180,12 @@
   </header>
 
   <main>
-    <!-- Banner Principal con opción de instalación -->
+    <!-- Banner Principal -->
     <div class="banner-header">
       <h2>✈️ El Jet del Evangelio Web-Tv</h2>
       <p>Llevando el mensaje de fe, esperanza y alabanza a todas las naciones</p>
       
-      <!-- Botón dinámico de instalación -->
+      <!-- Botón de instalación -->
       <button id="btnInstall" class="install-btn" style="display: none;">
         📲 Instalar Aplicación Web
       </button>
@@ -219,7 +223,6 @@
     &copy; 2026 El Jet del Evangelio Web-Tv — Todos los derechos reservados.
   </footer>
 
-  <!-- Script para habilitar la instalación de la App -->
   <script>
     let deferredPrompt;
     const btnInstall = document.getElementById('btnInstall');
@@ -241,7 +244,6 @@
       }
     });
 
-    // Registrar Service Worker básico
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('data:text/javascript,console.log("PWA Service Worker listo");');
     }
