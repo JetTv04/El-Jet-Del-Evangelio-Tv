@@ -14,9 +14,23 @@
   <meta name="theme-color" content="#1e293b">
 
   <!-- Integración de Webpushr para Notificaciones Push -->
-  <!-- start webpushr code --> 
-  <script>(function(w,d, s, id) {if(typeof(w.webpushr)!=='undefined') return;w.webpushr=w.webpushr||function(){(w.webpushr.q=w.webpushr.q||[]).push(arguments)};var js, fjs = d.getElementsByTagName(s)[0];js = d.createElement(s); js.id = id;js.async=1;js.src = "https://cdn.webpushr.com/app.min.js";fjs.parentNode.appendChild(js);}(window,document, 'script', 'webpushr-jssdk'));webpushr('setup',{'key':'BP1LOo-zgw9aIF3ei16h0C-JKNnJYfoWiuKcXbo0ywUMxZKf-pJ01TMaGkVPAg8Xfb0oJ6pqRgWAbqzGOhTy0bk' });</script>
-  <!-- end webpushr code -->
+<!-- start webpushr code --> 
+<script>
+  (function(w,d, s, id) {
+    if(typeof(w.webpushr)!=='undefined') return;
+    w.webpushr=w.webpushr||function(){(w.webpushr.q=w.webpushr.q||[]).push(arguments)};
+    var js, fjs = d.getElementsByTagName(s)[0];
+    js = d.createElement(s); js.id = id;js.async=1;
+    js.src = "https://cdn.webpushr.com/app.min.js";
+    fjs.parentNode.appendChild(js);
+  }(window,document, 'script', 'webpushr-jssdk'));
+
+  webpushr('setup', {
+    'key': 'BP1LOo-zgw9aIF3ei16h0C-JKNnJYfoWiuKcXbo0ywUMxZKf-pJ01TMaGkVPAg8Xfb0oJ6pqRgWAbqzGOhTy0bk',
+    'sw': '/El-Jet-Del-Evangelio-Tv/webpushr-sw.js'
+  });
+</script>
+<!-- end webpushr code -->
 
   <style>
     * {
