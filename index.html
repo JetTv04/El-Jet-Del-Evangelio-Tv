@@ -123,13 +123,14 @@
       cursor: pointer;
     }
 
-    /* Video player container */
+    /* Video Player Wrapper */
     .media-wrapper {
       width: 100%;
       border-radius: 12px;
       overflow: hidden;
       border: 1px solid var(--border-color);
       background-color: #000;
+      transition: all 0.3s ease;
     }
 
     .video-wrapper {
@@ -139,7 +140,7 @@
 
     iframe { width: 100%; height: 100%; border: none; }
 
-    /* Audio mode card */
+    /* Tarjeta indicadora cuando el Modo Audio está activo */
     .audio-mode-card {
       display: none;
       width: 100%;
@@ -158,6 +159,13 @@
     .audio-icon {
       font-size: 3rem;
       margin-bottom: 0.5rem;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.9; }
     }
 
     .audio-mode-card h3 {
@@ -168,15 +176,7 @@
 
     .audio-mode-card p {
       font-size: 0.95rem;
-      margin-bottom: 1.2rem;
       opacity: 0.9;
-    }
-
-    audio {
-      width: 100%;
-      max-width: 500px;
-      outline: none;
-      border-radius: 30px;
     }
 
     .interaction-container {
@@ -287,20 +287,16 @@
       <button id="btnInstall" class="install-btn" style="display: none;">📲 Instalar Aplicación Web</button>
     </div>
 
-    <!-- Reproductor de Video (por defecto) -->
+    <!-- Reproductor de Video (OK.ru) -->
     <div id="videoContainer" class="media-wrapper video-wrapper">
       <iframe id="videoIframe" src="https://ok.ru/videoembed/16493078060749?nochat=1&autoplay=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
     </div>
 
-    <!-- Tarjeta de Reproductor de Audio (Ahorro de Datos) -->
+    <!-- Indicador visual cuando el Modo Audio está activo -->
     <div id="audioContainer" class="audio-mode-card">
-      <div class="audio-icon">📻</div>
-      <h3>Radio Jet del Evangelio — Modo Audio</h3>
-      <p>Ahorrando datos móviles. Escuchando la transmisión en vivo.</p>
-      <audio id="audioPlayer" controls preload="none">
-        <source src="https://stream.playstore.stream/stream/1776608278" type="audio/mpeg">
-        Tu navegador no soporta el reproductor de audio.
-      </audio>
+      <div class="audio-icon">🎧</div>
+      <h3>El Jet del Evangelio — Escuchando Audio</h3>
+      <p>El reproductor de video se ha ocultado para ahorrar recursos y datos móviles.</p>
     </div>
 
     <div class="interaction-container">
@@ -359,35 +355,33 @@
       aplicarTema(nuevoTema);
     });
 
-    // --- MODO AUDIO ÚNICAMENTE ---
+    // --- MODO AUDIO ÚNICAMENTE (Opción 1: Mantiene el iframe de video pero oculto) ---
     const audioToggleBtn = document.getElementById('audioToggle');
     const audioText = document.getElementById('audioText');
     const videoContainer = document.getElementById('videoContainer');
     const audioContainer = document.getElementById('audioContainer');
-    const audioPlayer = document.getElementById('audioPlayer');
-    const videoIframe = document.getElementById('videoIframe');
-
-    const iframeOriginalSrc = videoIframe.src;
 
     audioToggleBtn.addEventListener('click', () => {
       const estaEnModoAudio = audioContainer.classList.contains('active');
 
       if (!estaEnModoAudio) {
-        // Activar Modo Audio
+        // Activar Modo Audio (Ocultar el reproductor visual pero mantener la transmisión)
         audioContainer.classList.add('active');
-        videoContainer.style.display = 'none';
-        videoIframe.src = ''; // Detiene el video para ahorrar ancho de banda
+        videoContainer.style.height = '0px';
+        videoContainer.style.opacity = '0';
+        videoContainer.style.overflow = 'hidden';
+        videoContainer.style.border = 'none';
+
         audioToggleBtn.classList.add('active');
         audioText.innerText = 'Ver Video';
-
-        // Intentar reproducir la señal de radio
-        audioPlayer.play().catch(e => console.log('Autoplay bloqueado por el navegador'));
       } else {
-        // Desactivar Modo Audio (Volver a Video)
+        // Desactivar Modo Audio (Restaurar el reproductor visual)
         audioContainer.classList.remove('active');
-        videoContainer.style.display = 'block';
-        videoIframe.src = iframeOriginalSrc; // Restaura el video
-        audioPlayer.pause();
+        videoContainer.style.height = '';
+        videoContainer.style.opacity = '1';
+        videoContainer.style.overflow = 'visible';
+        videoContainer.style.border = '';
+
         audioToggleBtn.classList.remove('active');
         audioText.innerText = 'Modo Audio';
       }
