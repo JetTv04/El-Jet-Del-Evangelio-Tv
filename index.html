@@ -125,6 +125,7 @@
 
     /* Video Player Wrapper */
     .media-wrapper {
+      position: relative;
       width: 100%;
       border-radius: 12px;
       overflow: hidden;
@@ -139,6 +140,58 @@
     }
 
     iframe { width: 100%; height: 100%; border: none; }
+
+    /* ESTILOS DEL OVERLAY PARA ACTIVAR AUDIO */
+    .unmute-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      cursor: pointer;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .unmute-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .unmute-btn {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      font-weight: bold;
+      font-size: 1.1rem;
+      padding: 14px 28px;
+      border-radius: 50px;
+      border: 2px solid #fca5a5;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: pulse-btn 1.5s infinite;
+    }
+
+    @keyframes pulse-btn {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    .unmute-overlay p {
+      margin-top: 12px;
+      font-size: 0.9rem;
+      color: #f8fafc;
+      opacity: 0.9;
+    }
 
     /* Tarjeta indicadora cuando el Modo Audio está activo */
     .audio-mode-card {
@@ -289,7 +342,15 @@
 
     <!-- Reproductor de Video (OK.ru) -->
     <div id="videoContainer" class="media-wrapper video-wrapper">
-      <iframe id="videoIframe" src="https://ok.ru/videoembed/16493078060749?nochat=1&autoplay=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+      <!-- Overlay interactivo para soltar el silencio -->
+      <div id="unmuteOverlay" class="unmute-overlay">
+        <div class="unmute-btn">
+          🔊 Toca para activar sonido
+        </div>
+        <p>Toca en cualquier parte del reproductor para escuchar</p>
+      </div>
+
+      <iframe id="videoIframe" src="https://ok.ru/videoembed/16493078060749?nochat=1&autoplay=1&muted=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
     </div>
 
     <!-- Indicador visual cuando el Modo Audio está activo -->
@@ -330,6 +391,19 @@
   </footer>
 
   <script>
+    // --- MANEJO DEL OVERLAY DE AUDIO (UNMUTE) ---
+    const unmuteOverlay = document.getElementById('unmuteOverlay');
+    const videoIframe = document.getElementById('videoIframe');
+
+    unmuteOverlay.addEventListener('click', () => {
+      // 1. Ocultar el overlay
+      unmuteOverlay.classList.add('hidden');
+
+      // 2. Recargar el iframe con el parámetro sin silenciar (muted=1 remoción)
+      // La interacción del toque otorga permiso al navegador para reproducir sonido automáticamente
+      videoIframe.src = "https://ok.ru/videoembed/16493078060749?nochat=1&autoplay=1";
+    });
+
     // --- MODO OSCURO / CLARO ---
     const themeToggleBtn = document.getElementById('themeToggle');
     const themeIcon = document.getElementById('themeIcon');
@@ -355,7 +429,7 @@
       aplicarTema(nuevoTema);
     });
 
-    // --- MODO AUDIO ÚNICAMENTE (Opción 1: Mantiene el iframe de video pero oculto) ---
+    // --- MODO AUDIO ÚNICAMENTE ---
     const audioToggleBtn = document.getElementById('audioToggle');
     const audioText = document.getElementById('audioText');
     const videoContainer = document.getElementById('videoContainer');
@@ -365,7 +439,6 @@
       const estaEnModoAudio = audioContainer.classList.contains('active');
 
       if (!estaEnModoAudio) {
-        // Activar Modo Audio (Ocultar el reproductor visual pero mantener la transmisión)
         audioContainer.classList.add('active');
         videoContainer.style.height = '0px';
         videoContainer.style.opacity = '0';
@@ -375,7 +448,6 @@
         audioToggleBtn.classList.add('active');
         audioText.innerText = 'Ver Video';
       } else {
-        // Desactivar Modo Audio (Restaurar el reproductor visual)
         audioContainer.classList.remove('active');
         videoContainer.style.height = '';
         videoContainer.style.opacity = '1';
