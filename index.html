@@ -3,321 +3,129 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>El Jet del Evangelio Web-Tv - En Vivo</title>
-  
-  <!-- Icono local del navegador y PWA -->
-  <link rel="icon" type="image/png" href="./icon.png">
-  <link rel="apple-touch-icon" href="./icon.png">
-  
-  <!-- Manifest para PWA -->
+  <title>El Jet del Evangelio Web-Tv</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e293b">
-
-  <!-- Integración de Webpushr para Notificaciones Push -->
-<!-- start webpushr code --> 
-<script>
-  (function(w,d, s, id) {
-    if(typeof(w.webpushr)!=='undefined') return;
-    w.webpushr=w.webpushr||function(){(w.webpushr.q=w.webpushr.q||[]).push(arguments)};
-    var js, fjs = d.getElementsByTagName(s)[0];
-    js = d.createElement(s); js.id = id;js.async=1;
-    js.src = "https://cdn.webpushr.com/app.min.js";
-    fjs.parentNode.appendChild(js);
-  }(window,document, 'script', 'webpushr-jssdk'));
-
-  webpushr('setup', {
-    'key': 'BP1LOo-zgw9aIF3ei16h0C-JKNnJYfoWiuKcXbo0ywUMxZKf-pJ01TMaGkVPAg8Xfb0oJ6pqRgWAbqzGOhTy0bk',
-    'sw': '/El-Jet-Del-Evangelio-Tv/webpushr-sw.js'
-  });
-</script>
-<!-- end webpushr code -->
-
+  <link rel="icon" href="icon.png" type="image/png">
   <style>
-    * {
-      box-sizing: border-box;
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-    }
-    body {
-      background-color: #0f172a;
-      color: #f8fafc;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      text-align: center;
     }
     header {
-      background-color: #1e293b;
-      padding: 1rem 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #334155;
+      padding: 20px;
+      background-color: #1f1f1f;
     }
-    .logo-container h1 {
-      font-size: 1.3rem;
-      color: #ffffff;
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
     }
-    .live-badge {
-      background-color: #ef4444;
-      color: white;
-      font-size: 0.75rem;
-      font-weight: bold;
-      padding: 4px 10px;
-      border-radius: 4px;
-      animation: pulse 2s infinite;
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 0 15px;
     }
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
-    }
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 1.5rem 1rem;
-      max-width: 1000px;
-      margin: 0 auto;
-      width: 100%;
-      gap: 1.5rem;
-    }
-
-    /* Banner personalizado */
-    .banner-header {
-      width: 100%;
-      background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%);
+    /* Tarjeta del Versículo del Día */
+    .verse-card {
+      background: #1e1e1e;
+      color: #fff;
+      padding: 18px;
       border-radius: 12px;
-      padding: 2rem 1.5rem;
-      text-align: center;
-      border: 1px solid #38bdf8;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      border-left: 4px solid #ffcc00;
+      margin-bottom: 20px;
+      text-align: left;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
-    .banner-header h2 {
-      font-size: 1.8rem;
-      color: #ffffff;
-      margin-bottom: 0.5rem;
-    }
-    .banner-header p {
-      color: #e0f2fe;
-      font-size: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .banner-actions {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    /* Botones de acción */
-    .action-btn {
-      display: inline-block;
-      color: white;
+    .verse-title {
+      color: #ffcc00;
       font-weight: bold;
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-size: 0.95rem;
-      transition: transform 0.2s, opacity 0.2s;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 8px;
     }
-    .action-btn:hover {
-      transform: translateY(-2px);
-      opacity: 0.9;
+    .verse-text {
+      font-style: italic;
+      font-size: 1.05rem;
+      margin: 0 0 8px 0;
+      line-height: 1.4;
     }
-    .btn-install {
-      background-color: #22c55e;
-      box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
+    .verse-ref {
+      font-size: 0.9rem;
+      color: #bbb;
+      font-weight: bold;
+      display: block;
+      text-align: right;
     }
-    .btn-notify {
-      background-color: #eab308;
-      color: #0f172a;
-      box-shadow: 0 4px 10px rgba(234, 179, 8, 0.3);
-    }
-
-    /* Contenedor del video */
-    .video-wrapper {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      background-color: #000;
-      border-radius: 12px;
+    /* Reproductor de Video */
+    .player-container {
+      position: relative;
+      padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+      height: 0;
       overflow: hidden;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-      border: 1px solid #334155;
+      border-radius: 12px;
+      background-color: #000;
     }
-    iframe {
+    .player-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
-      border: none;
-    }
-
-    /* Tarjeta de redes sociales */
-    .info-card {
-      width: 100%;
-      background-color: #1e293b;
-      padding: 1.5rem;
-      border-radius: 12px;
-      border: 1px solid #334155;
-    }
-    .info-card h3 {
-      font-size: 1.1rem;
-      color: #38bdf8;
-      margin-bottom: 1rem;
-    }
-    .social-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .social-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 20px;
-      border-radius: 8px;
-      color: white;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: transform 0.2s, opacity 0.2s;
-    }
-    .social-btn:hover {
-      transform: translateY(-2px);
-      opacity: 0.9;
-    }
-
-    .btn-radio { background-color: #0284c7; }
-    .btn-youtube { background-color: #ff0000; }
-    .btn-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
-
-    footer {
-      text-align: center;
-      padding: 1.5rem;
-      color: #64748b;
-      font-size: 0.85rem;
-      border-top: 1px solid #334155;
-      margin-top: auto;
+      border: 0;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="logo-container">
-      <h1>✈️ El Jet del Evangelio Web-Tv</h1>
-    </div>
-    <span class="live-badge">EN VIVO</span>
+    <h1>El Jet del Evangelio Web-Tv</h1>
   </header>
 
-  <main>
-    <!-- Banner Principal -->
-    <div class="banner-header">
-      <h2>✈️ El Jet del Evangelio Web-Tv</h2>
-      <p>Llevando el mensaje de fe, esperanza y alabanza a todas las naciones</p>
-      
-      <div class="banner-actions">
-        <!-- Botón PWA -->
-        <button id="btnInstall" class="action-btn btn-install" style="display: none;">
-          📲 Instalar Aplicación Web
-        </button>
-
-        <!-- Botón manual de notificaciones -->
-        <button onclick="requestNotificationPermission()" class="action-btn btn-notify">
-          🔔 Activar Avisos en Vivo
-        </button>
-      </div>
+  <div class="container">
+    
+    <!-- Tarjeta Interactiva del Versículo del Día -->
+    <div class="verse-card">
+      <span class="verse-title">📖 Versículo del Día</span>
+      <p class="verse-text" id="verse-text">Cargando la Palabra de hoy...</p>
+      <span class="verse-ref" id="verse-ref"></span>
     </div>
 
-    <!-- Reproductor de video OK.ru -->
-    <div class="video-wrapper">
-      <iframe 
-        src="https://ok.ru/videoembed/16493078060749?nochat=1&autoplay=1" 
-        allow="autoplay; encrypted-media; fullscreen" 
-        allowfullscreen>
-      </iframe>
+    <!-- Reproductor de Video (OK.ru) -->
+    <div class="player-container">
+      <iframe src="https://ok.ru/videoembed/8982390111933?nochat=1" allowfullscreen></iframe>
     </div>
 
-    <!-- Panel de Canales y Aplicaciones -->
-    <div class="info-card">
-      <h3>Nuestros Canales y Aplicaciones:</h3>
-      <div class="social-buttons">
-        <a href="https://playstore.stream/app/dcc09dbfcac88017?app-multi=1776608278&instalado=sim" target="_blank" class="social-btn btn-radio">
-          📻 Escuchar Radio Jet
-        </a>
-        
-        <a href="https://www.youtube.com/@radioeljetdelevangelio" target="_blank" class="social-btn btn-youtube">
-          ▶️ Canal de YouTube
-        </a>
-
-        <a href="https://www.instagram.com/carolpaz820" target="_blank" class="social-btn btn-instagram">
-          📸 Instagram
-        </a>
-      </div>
-    </div>
-  </main>
-
-  <footer>
-    &copy; 2026 El Jet del Evangelio Web-Tv — Todos los derechos reservados.
-  </footer>
+  </div>
 
   <script>
-    // Manejo de PWA
-    let deferredPrompt;
-    const btnInstall = document.getElementById('btnInstall');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      btnInstall.style.display = 'inline-block';
-    });
-
-    btnInstall.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          btnInstall.style.display = 'none';
-        }
-        deferredPrompt = null;
-      }
-    });
-
-    // Registrar Service Worker de Webpushr
+    // Registro de PWA Service Worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./webpushr-sw.js').then(function() {
-        console.log('Webpushr SW registrado correctamente');
-      }).catch(function(err) {
-        console.log('Error al registrar SW:', err);
+      navigator.serviceWorker.register('./webpushr-sw.js').catch(function(err) {
+        console.log('SW registro:', err);
       });
     }
 
-    // Solicitud forzada de permisos
-    function requestNotificationPermission() {
-      if (!("Notification" in window)) {
-        alert("Tu navegador no soporta notificaciones.");
-        return;
-      }
-
-      if (Notification.permission === "granted") {
-        alert("¡Ya tienes las notificaciones activadas!");
-      } else if (Notification.permission !== "denied") {
-        Notification.requestPermission().then(function (permission) {
-          if (permission === "granted") {
-            alert("¡Gracias! Notificaciones activadas con éxito.");
-            if (typeof webpushr === 'function') {
-              webpushr('prompt');
-            }
-          } else {
-            alert("Permiso denegado. Puedes activarlo desde la configuración de tu navegador.");
-          }
-        });
-      } else {
-        alert("Las notificaciones están bloqueadas en tu navegador. Haz clic en el icono del candado 🔒 junto a la URL para permitir notificaciones.");
+    // Obtener Versículo del Día automáticamente (API Bíblica)
+    async function cargarVersiculoDelDia() {
+      try {
+        const respuesta = await fetch('https://beta.ourmanna.com/api/v1/get?format=json&order=daily');
+        const datos = await respuesta.json();
+        
+        document.getElementById('verse-text').innerText = `"${datos.verse.details.text}"`;
+        document.getElementById('verse-ref').innerText = `— ${datos.verse.details.reference} (${datos.verse.details.version})`;
+      } catch (error) {
+        // Versículo de respaldo si no hay conexión a la API
+        document.getElementById('verse-text').innerText = '"Todo lo puedo en Cristo que me fortalece."';
+        document.getElementById('verse-ref').innerText = '— Filipenses 4:13 (RVR1960)';
       }
     }
+
+    cargarVersiculoDelDia();
   </script>
 
 </body>
