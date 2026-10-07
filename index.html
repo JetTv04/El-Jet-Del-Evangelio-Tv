@@ -145,7 +145,7 @@
       overflow: hidden;
       border: 1px solid var(--border-color);
       background-color: #000;
-      transition: all 0.3s ease;
+      transition: all 0.4s ease;
     }
 
     .video-wrapper {
@@ -154,6 +154,52 @@
     }
 
     iframe { width: 100%; height: 100%; border: none; }
+
+    /* --- ESTILOS MODO CINE --- */
+    #cinemaOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(5, 7, 15, 0.96);
+      z-index: 9998;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    body.cinema-mode #cinemaOverlay {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    body.cinema-mode #videoContainer {
+      position: relative;
+      z-index: 9999;
+      box-shadow: 0 0 50px rgba(56, 189, 248, 0.4);
+    }
+
+    #btnExitCinema {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+      display: none;
+    }
+
+    body.cinema-mode #btnExitCinema {
+      display: block;
+    }
 
     .unmute-overlay {
       position: absolute;
@@ -459,11 +505,18 @@
 </head>
 <body>
 
+  <!-- Capa Oscura y Botón de Salida Modo Cine -->
+  <div id="cinemaOverlay" onclick="toggleCinemaMode()"></div>
+  <button id="btnExitCinema" onclick="toggleCinemaMode()">❌ Salir de Modo Cine</button>
+
   <header>
     <div class="logo-container">
       <h1>✈️ El Jet del Evangelio Web-Tv</h1>
     </div>
     <div class="header-actions">
+      <button id="cinemaToggle" class="action-toggle-btn" onclick="toggleCinemaMode()">
+        <span>🎬</span> <span id="cinemaText">Modo Cine</span>
+      </button>
       <button id="audioToggle" class="action-toggle-btn">
         <span>🎧</span> <span id="audioText">Modo Audio</span>
       </button>
@@ -597,6 +650,22 @@
     const messaging = firebase.messaging();
 
     let currentUser = null;
+
+    // --- LÓGICA DE MODO CINE ---
+    function toggleCinemaMode() {
+      document.body.classList.toggle('cinema-mode');
+      const isCinema = document.body.classList.contains('cinema-mode');
+      const cinemaBtn = document.getElementById('cinemaToggle');
+      if (cinemaBtn) {
+        cinemaBtn.classList.toggle('active', isCinema);
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.body.classList.contains('cinema-mode')) {
+        toggleCinemaMode();
+      }
+    });
 
     // --- CONTADOR DE GENTE EN LÍNEA (PRESENCIA REALTIME) ---
     const connectedRef = db.ref('.info/connected');
