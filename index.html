@@ -13,6 +13,9 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1e293b">
 
+  <!-- Librería liviana para animación de celebración -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -121,7 +124,32 @@
       border: none;
     }
 
-    /* Tarjeta de redes sociales y Versículo */
+    /* Botón Interactivo "Amén" */
+    .amen-container {
+      width: 100%;
+      text-align: center;
+    }
+    .amen-btn {
+      background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+      color: white;
+      font-weight: bold;
+      font-size: 1.1rem;
+      padding: 14px 28px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .amen-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.5);
+    }
+    .amen-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Tarjetas de información */
     .info-card {
       width: 100%;
       background-color: #1e293b;
@@ -160,7 +188,7 @@
     .btn-youtube { background-color: #ff0000; }
     .btn-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
 
-    /* Estilos del Versículo del Día */
+    /* Versículo del Día */
     .verse-card {
       border-left: 4px solid #38bdf8;
     }
@@ -204,7 +232,7 @@
       <h2>✈️ El Jet del Evangelio Web-Tv</h2>
       <p>Llevando el mensaje de fe, esperanza y alabanza a todas las naciones</p>
       
-      <!-- Botón de instalación -->
+      <!-- Botón de instalación PWA -->
       <button id="btnInstall" class="install-btn" style="display: none;">
         📲 Instalar Aplicación Web
       </button>
@@ -217,6 +245,13 @@
         allow="autoplay; encrypted-media; fullscreen" 
         allowfullscreen>
       </iframe>
+    </div>
+
+    <!-- Botón de Interacción de Celebración -->
+    <div class="amen-container">
+      <button id="btnAmen" class="amen-btn">
+        🙌 ¡Decir Amén!
+      </button>
     </div>
 
     <!-- Panel de Canales y Aplicaciones -->
@@ -250,6 +285,7 @@
   </footer>
 
   <script>
+    // Configuración de instalación de PWA
     let deferredPrompt;
     const btnInstall = document.getElementById('btnInstall');
 
@@ -274,7 +310,19 @@
       navigator.serviceWorker.register('data:text/javascript,console.log("PWA Service Worker listo");');
     }
 
-    // Lista de versículos en español (RVR1960) que cambia según el día del mes
+    // Animación de Celebración al presionar "Amén"
+    document.getElementById('btnAmen').addEventListener('click', () => {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.7 },
+          colors: ['#38bdf8', '#0284c7', '#ffffff', '#f59e0b']
+        });
+      }
+    });
+
+    // Versículos locales en español (RVR1960)
     const versiculos = [
       { t: "Todo lo puedo en Cristo que me fortalece.", r: "Filipenses 4:13" },
       { t: "El Señor es mi pastor; nada me faltará.", r: "Salmos 23:1" },
