@@ -204,4 +204,96 @@
       <h2>✈️ El Jet del Evangelio Web-Tv</h2>
       <p>Llevando el mensaje de fe, esperanza y alabanza a todas las naciones</p>
       
-      <!--
+      <!-- Botón de instalación -->
+      <button id="btnInstall" class="install-btn" style="display: none;">
+        📲 Instalar Aplicación Web
+      </button>
+    </div>
+
+    <!-- Reproductor de video OK.ru -->
+    <div class="video-wrapper">
+      <iframe 
+        src="https://ok.ru/videoembed/16493078060749?nochat=1&autoplay=1" 
+        allow="autoplay; encrypted-media; fullscreen" 
+        allowfullscreen>
+      </iframe>
+    </div>
+
+    <!-- Panel de Canales y Aplicaciones -->
+    <div class="info-card">
+      <h3>Nuestros Canales y Aplicaciones:</h3>
+      <div class="social-buttons">
+        <a href="https://playstore.stream/app/dcc09dbfcac88017?app-multi=1776608278&instalado=sim" target="_blank" class="social-btn btn-radio">
+          📻 Escuchar Radio Jet
+        </a>
+        
+        <a href="https://www.youtube.com/@radioeljetdelevangelio" target="_blank" class="social-btn btn-youtube">
+          ▶️ Canal de YouTube
+        </a>
+
+        <a href="https://www.instagram.com/carolpaz820" target="_blank" class="social-btn btn-instagram">
+          📸 Instagram
+        </a>
+      </div>
+    </div>
+
+    <!-- Tarjeta del Versículo del Día -->
+    <div class="info-card verse-card">
+      <h3>📖 Versículo del Día</h3>
+      <p class="verse-text" id="verse-text">"Seguid la paz con todos, y la santidad, sin la cual nadie verá al Señor."</p>
+      <span class="verse-ref" id="verse-ref">— Hebreos 12:14 (RVR1960)</span>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2026 El Jet del Evangelio Web-Tv — Todos los derechos reservados.
+  </footer>
+
+  <script>
+    let deferredPrompt;
+    const btnInstall = document.getElementById('btnInstall');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      btnInstall.style.display = 'inline-block';
+    });
+
+    btnInstall.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          btnInstall.style.display = 'none';
+        }
+        deferredPrompt = null;
+      }
+    });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('data:text/javascript,console.log("PWA Service Worker listo");');
+    }
+
+    // Lista de versículos en español (RVR1960) que cambia según el día del mes
+    const versiculos = [
+      { t: "Todo lo puedo en Cristo que me fortalece.", r: "Filipenses 4:13" },
+      { t: "El Señor es mi pastor; nada me faltará.", r: "Salmos 23:1" },
+      { t: "Seguid la paz con todos, y la santidad, sin la cual nadie verá al Señor.", r: "Hebreos 12:14" },
+      { t: "Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito.", r: "Juan 3:16" },
+      { t: "Clama a mí, y yo te responderé, y te enseñaré cosas grandes y ocultas.", r: "Jeremías 33:3" },
+      { t: "Jehová es mi luz y mi salvación; ¿de quién temeré?", r: "Salmos 27:1" },
+      { t: "No temas, porque yo estoy contigo; no desmayes, porque yo soy tu Dios.", r: "Isaías 41:10" }
+    ];
+
+    function cargarVersiculo() {
+      const dia = new Date().getDate();
+      const v = versiculos[dia % versiculos.length];
+      document.getElementById('verse-text').innerText = `"${v.t}"`;
+      document.getElementById('verse-ref').innerText = `— ${v.r} (RVR1960)`;
+    }
+
+    cargarVersiculo();
+  </script>
+
+</body>
+</html>
