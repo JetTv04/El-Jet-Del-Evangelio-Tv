@@ -3,24 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mesa de Control - El Jet del Evangelio Admin</title>
+  <title>El Jet del Evangelio Web-Tv - En Vivo</title>
   
   <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Plane_icon_font_awesome.svg/512px-Plane_icon_font_awesome.svg.png">
-  <meta name="theme-color" content="#0f172a">
+  <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Plane_icon_font_awesome.svg/512px-Plane_icon_font_awesome.svg.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e293b">
+
+  <!-- Librerías Externas -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <!-- Firebase SDKs via CDN -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <style>
     :root {
       --bg-color: #0f172a;
+      --header-bg: #1e293b;
       --card-bg: #1e293b;
       --text-color: #f8fafc;
       --border-color: #334155;
       --accent-color: #38bdf8;
-      --danger-color: #ef4444;
-      --success-color: #22c55e;
+    }
+
+    body.light-mode {
+      --bg-color: #f1f5f9;
+      --header-bg: #ffffff;
+      --card-bg: #ffffff;
+      --text-color: #0f172a;
+      --border-color: #cbd5e1;
+      --accent-color: #0284c7;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,10 +46,11 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
     header {
-      background-color: var(--card-bg);
+      background-color: var(--header-bg);
       padding: 1rem 1.5rem;
       display: flex;
       justify-content: space-between;
@@ -45,200 +60,405 @@
       gap: 10px;
     }
 
-    .mode-switch {
-      display: flex;
-      background: var(--bg-color);
-      padding: 4px;
-      border-radius: 30px;
-      border: 1px solid var(--border-color);
-    }
+    .logo-container h1 { font-size: 1.2rem; color: var(--text-color); }
 
-    .mode-btn {
+    .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .action-toggle-btn {
       background: transparent;
-      border: none;
+      border: 1px solid var(--border-color);
       color: var(--text-color);
-      padding: 8px 16px;
+      padding: 6px 12px;
       border-radius: 20px;
       cursor: pointer;
-      font-weight: 600;
       font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
     }
 
-    .mode-btn.active { background-color: var(--accent-color); color: #0f172a; }
+    .action-toggle-btn.active {
+      background-color: var(--accent-color);
+      color: #0f172a;
+      border-color: var(--accent-color);
+      font-weight: bold;
+    }
+
+    .live-badge {
+      background-color: #ef4444;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
 
     main {
       flex: 1;
-      max-width: 1100px;
-      width: 100%;
-      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       padding: 1.5rem 1rem;
-      display: flex;
-      flex-direction: column;
+      max-width: 1000px;
+      margin: 0 auto;
+      width: 100%;
       gap: 1.5rem;
     }
 
-    .grid-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
+    .banner-header {
+      width: 100%;
+      background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%);
       border-radius: 12px;
-      padding: 1.25rem;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      border: 1px solid #38bdf8;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .banner-header h2 { font-size: 1.8rem; color: #ffffff; margin-bottom: 0.5rem; }
+    .banner-header p { color: #e0f2fe; font-size: 1rem; margin-bottom: 1rem; }
+
+    .admin-alert-banner {
+      display: none;
+      width: 100%;
+      background-color: #f59e0b;
+      color: #000;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-align: center;
+      animation: pulseAlert 2s infinite;
+    }
+
+    @keyframes pulseAlert {
+      0% { opacity: 0.9; }
+      50% { opacity: 1; }
+      100% { opacity: 0.9; }
+    }
+
+    .media-wrapper {
+      position: relative;
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      background-color: #000;
+      transition: all 0.3s ease;
+    }
+
+    .video-wrapper {
+      aspect-ratio: 16 / 9;
+      width: 100%;
+    }
+
+    iframe { width: 100%; height: 100%; border: none; }
+
+    .unmute-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px);
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      cursor: pointer;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
     }
 
-    .card h2 { font-size: 1.1rem; color: var(--accent-color); }
+    .unmute-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
 
-    .counters-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .unmute-btn {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      font-weight: bold;
+      font-size: 1.1rem;
+      padding: 14px 28px;
+      border-radius: 50px;
+      border: 2px solid #fca5a5;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: pulse-btn 1.5s infinite;
+    }
 
-    .counter-box {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 1rem;
+    @keyframes pulse-btn {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    .audio-mode-card {
+      display: none;
+      width: 100%;
+      background-color: var(--card-bg);
+      padding: 2rem 1.5rem;
+      border-radius: 12px;
       text-align: center;
+      border: 1px solid var(--accent-color);
     }
 
-    .counter-value { font-size: 2rem; font-weight: bold; color: var(--accent-color); }
+    .audio-mode-card.active { display: block; }
 
-    .admin-btn {
-      flex: 1;
-      padding: 12px;
-      border-radius: 8px;
+    .interaction-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      padding: 12px 24px;
+      border-radius: 50px;
       border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .amen-btn { background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%); }
+    .plane-btn { background: linear-gradient(135deg, #0284c7 0%, #10b981 100%); }
+
+    .flying-plane {
+      position: fixed;
+      bottom: -50px;
+      font-size: 2.5rem;
+      user-select: none;
+      pointer-events: none;
+      z-index: 9999;
+      animation: flyUp 2s ease-out forwards;
+    }
+
+    @keyframes flyUp {
+      0% { transform: translateY(0) scale(0.6); opacity: 1; }
+      100% { transform: translateY(-110vh) scale(1.3); opacity: 0; }
+    }
+
+    .info-card {
+      width: 100%;
+      background-color: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .info-card h3 { font-size: 1.1rem; color: var(--accent-color); margin-bottom: 1rem; }
+
+    .auth-chat-card {
+      width: 100%;
+      background-color: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .auth-box {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .google-btn {
+      background-color: #ffffff;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
-      color: white;
-      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .btn-primary { background-color: #0284c7; }
-    .btn-success { background-color: var(--success-color); }
-    .btn-danger { background-color: var(--danger-color); }
-    .btn-warning { background-color: #f59e0b; color: #000; }
+    .chat-box {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
 
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .chat-box.active { display: flex; }
 
-    input[type="text"], textarea {
-      width: 100%;
-      padding: 10px 12px;
+    .chat-input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-input-group input {
+      flex: 1;
+      padding: 10px 14px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
       background-color: var(--bg-color);
       color: var(--text-color);
     }
 
-    .messages-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-height: 350px;
-      overflow-y: auto;
-    }
-
-    .message-item {
-      background-color: var(--bg-color);
-      border: 1px solid var(--border-color);
-      padding: 10px;
+    .chat-input-group button {
+      background-color: var(--accent-color);
+      color: #0f172a;
+      border: none;
+      padding: 10px 18px;
       border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
     }
 
-    .advanced-only { display: none; }
-    body.mode-advanced .advanced-only { display: flex; }
+    .user-info-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--accent-color);
+      margin-bottom: 8px;
+    }
+
+    .logout-link {
+      color: #ef4444;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .social-buttons { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 12px 20px;
+      border-radius: 8px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .btn-radio { background-color: #0284c7; }
+    .btn-youtube { background-color: #ff0000; }
+    .btn-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+
+    .verse-card { border-left: 4px solid var(--accent-color); }
+    .verse-text { font-style: italic; margin-bottom: 0.5rem; }
+    .verse-ref { font-size: 0.9rem; color: var(--accent-color); font-weight: 600; text-align: right; display: block; }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: #64748b;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border-color);
+      margin-top: auto;
+    }
   </style>
 </head>
-<body class="mode-easy">
+<body>
 
   <header>
-    <div style="display:flex; align-items:center; gap:10px;">
-      <span>🎛️</span>
-      <h1>Panel de Administración TV</h1>
+    <div class="logo-container">
+      <h1>✈️ El Jet del Evangelio Web-Tv</h1>
     </div>
-
-    <div class="mode-switch">
-      <button id="btnModeEasy" class="mode-btn active">⚡ Modo Fácil</button>
-      <button id="btnModeAdvanced" class="mode-btn">🛠️ Modo Avanzado</button>
+    <div class="header-actions">
+      <button id="audioToggle" class="action-toggle-btn">
+        <span>🎧</span> <span id="audioText">Modo Audio</span>
+      </button>
+      <button id="themeToggle" class="action-toggle-btn">
+        <span id="themeIcon">🌙</span> <span id="themeText">Oscuro</span>
+      </button>
+      <span class="live-badge">EN VIVO</span>
     </div>
   </header>
 
   <main>
-    <div class="grid-container">
-      
-      <!-- Contadores Realtime -->
-      <div class="card">
-        <h2>📊 Interacción en Vivo</h2>
-        <div class="counters-grid">
-          <div class="counter-box">
-            <div id="countAmen" class="counter-value">0</div>
-            <div style="font-size:0.8rem;">🙌 Amén Recibidos</div>
-          </div>
-          <div class="counter-box">
-            <div id="countJets" class="counter-value">0</div>
-            <div style="font-size:0.8rem;">✈️ Jets Lanzados</div>
-          </div>
-        </div>
-
-        <div style="display:flex; gap:10px;">
-          <button id="triggerConfetti" class="admin-btn btn-primary">🎉 Tirar Confetti</button>
-          <button id="triggerJets" class="admin-btn btn-success">✈️ Lanzar Jets</button>
-        </div>
-      </div>
-
-      <!-- Bandeja Realtime de Mensajes -->
-      <div class="card">
-        <h2>💬 Peticiones y Saludos en Vivo</h2>
-        <div id="messagesContainer" class="messages-list">
-          <p style="font-size:0.85rem; opacity:0.6; text-align:center;">Cargando mensajes...</p>
-        </div>
-
-        <div class="advanced-only">
-          <button id="btnClearMessages" class="admin-btn btn-danger" style="width: 100%;">
-            🧹 Limpiar Historial de Mensajes
-          </button>
-        </div>
-      </div>
-
+    <div class="banner-header">
+      <h2>✈️ El Jet del Evangelio Web-Tv</h2>
+      <p>Llevando el mensaje de fe, esperanza y alabanza a todas las naciones</p>
     </div>
 
-    <div class="grid-container advanced-only">
+    <!-- Alerta en vivo enviada desde Admin -->
+    <div id="adminAlert" class="admin-alert-banner"></div>
 
-      <!-- Gestión de Transmisión Especial -->
-      <div class="card">
-        <h2>📺 Transmisión Especial (Embed)</h2>
-        <div class="form-group">
-          <label style="font-size:0.85rem;">URL de incrustación (Iframe/Embed):</label>
-          <textarea id="embedInput" placeholder="https://www.youtube.com/embed/..."></textarea>
-        </div>
-        <div style="display:flex; gap:10px;">
-          <button id="btnStartLive" class="admin-btn btn-success">🔴 Activar En Vivo</button>
-          <button id="btnStopLive" class="admin-btn btn-danger">⏹️ Restaurar OK.ru</button>
-        </div>
+    <!-- Reproductor de Video -->
+    <div id="videoContainer" class="media-wrapper video-wrapper">
+      <div id="unmuteOverlay" class="unmute-overlay">
+        <div class="unmute-btn">🔊 Toca para activar sonido</div>
+        <p style="margin-top: 10px;">Toca en cualquier parte para escuchar</p>
       </div>
 
-      <!-- Emisor de Alertas -->
-      <div class="card">
-        <h2>📢 Enviar Aviso / Marquesina</h2>
-        <div class="form-group">
-          <input type="text" id="alertInput" placeholder="Ej: ¡Estamos en vivo! Envía tu mensaje.">
-        </div>
-        <div style="display:flex; gap:10px;">
-          <button id="btnSendAlert" class="admin-btn btn-warning">📢 Publicar Aviso</button>
-          <button id="btnClearAlert" class="admin-btn btn-danger">❌ Quitar Aviso</button>
-        </div>
+      <iframe id="videoIframe" src="https://ok.ru/videoembed/16493078060749?nochat=1&autoplay=1&muted=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+    </div>
 
-        <button id="btnResetCounters" class="admin-btn btn-danger" style="margin-top:10px;">
-          🔄 Reiniciar Contadores (Amén / Jets)
+    <!-- Indicador Modo Audio -->
+    <div id="audioContainer" class="audio-mode-card">
+      <div style="font-size:3rem; margin-bottom:8px;">🎧</div>
+      <h3 style="color:var(--accent-color);">Escuchando Modo Audio</h3>
+      <p>El reproductor visual está oculto para ahorrar datos.</p>
+    </div>
+
+    <!-- Botones Interactivos -->
+    <div class="interaction-container">
+      <button id="btnAmen" class="action-btn amen-btn">🙌 <span id="txtAmen">¡Decir Amén!</span></button>
+      <button id="btnPlane" class="action-btn plane-btn">✈️ <span id="txtPlane">Lanzar Jet</span></button>
+    </div>
+
+    <!-- Sección de Autenticación y Mensajería -->
+    <div class="auth-chat-card">
+      <h3>💬 Peticiones de Oración y Saludos</h3>
+
+      <!-- Estado: No autenticado -->
+      <div id="authBox" class="auth-box">
+        <p style="font-size:0.9rem; opacity:0.8;">Inicia sesión para enviar tu mensaje en vivo a la transmisión:</p>
+        <button id="btnGoogleLogin" class="google-btn">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="Google">
+          Continuar con Google
         </button>
       </div>
 
+      <!-- Estado: Autenticado -->
+      <div id="chatBox" class="chat-box">
+        <div class="user-info-bar">
+          <span id="userName">Hola, Usuario</span>
+          <span id="btnLogout" class="logout-link">Cerrar Sesión</span>
+        </div>
+        <div class="chat-input-group">
+          <input type="text" id="msgInput" placeholder="Escribe tu saludo o petición de oración...">
+          <button id="btnSendMsg">Enviar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h3>Nuestros Canales:</h3>
+      <div class="social-buttons">
+        <a href="https://playstore.stream/app/dcc09dbfcac88017?app-multi=1776608278&instalado=sim" target="_blank" class="social-btn btn-radio">📻 Escuchar Radio Jet</a>
+        <a href="https://www.youtube.com/@radioeljetdelevangelio" target="_blank" class="social-btn btn-youtube">▶️ Canal de YouTube</a>
+        <a href="https://www.instagram.com/carolpaz820" target="_blank" class="social-btn btn-instagram">📸 Instagram</a>
+      </div>
+    </div>
+
+    <div class="info-card verse-card">
+      <h3>📖 Versículo del Día</h3>
+      <p class="verse-text" id="verse-text">Cargando versículo...</p>
+      <span class="verse-ref" id="verse-ref"></span>
     </div>
   </main>
+
+  <footer>
+    &copy; 2026 El Jet del Evangelio Web-Tv — Todos los derechos reservados.
+  </footer>
 
   <script>
     // --- INICIALIZACIÓN DE FIREBASE ---
@@ -254,92 +474,136 @@
     };
 
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     const db = firebase.database();
 
-    // Modos Fácil / Avanzado
-    document.getElementById('btnModeEasy').addEventListener('click', () => {
-      document.body.className = 'mode-easy';
-      document.getElementById('btnModeEasy').classList.add('active');
-      document.getElementById('btnModeAdvanced').classList.remove('active');
+    let currentUser = null;
+
+    // Autenticación con Google
+    document.getElementById('btnGoogleLogin').addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(err => alert("Error al iniciar sesión: " + err.message));
     });
 
-    document.getElementById('btnModeAdvanced').addEventListener('click', () => {
-      document.body.className = 'mode-advanced';
-      document.getElementById('btnModeAdvanced').classList.add('active');
-      document.getElementById('btnModeEasy').classList.remove('active');
-    });
+    document.getElementById('btnLogout').addEventListener('click', () => auth.signOut());
 
-    // Escuchador de Contadores
-    db.ref('contadores').on('value', snapshot => {
-      const val = snapshot.val() || {};
-      document.getElementById('countAmen').innerText = val.amen || 0;
-      document.getElementById('countJets').innerText = val.jets || 0;
-    });
+    auth.onAuthStateChanged(user => {
+      currentUser = user;
+      const authBox = document.getElementById('authBox');
+      const chatBox = document.getElementById('chatBox');
 
-    // Escuchador de Mensajes de la Audiencia
-    db.ref('mensajes').on('value', snapshot => {
-      const container = document.getElementById('messagesContainer');
-      container.innerHTML = '';
-      const data = snapshot.val();
-
-      if (!data) {
-        container.innerHTML = '<p style="font-size:0.85rem; opacity:0.6; text-align:center;">No hay mensajes registrados.</p>';
-        return;
+      if (user) {
+        authBox.style.display = 'none';
+        chatBox.classList.add('active');
+        document.getElementById('userName').innerText = `👋 ${user.displayName || user.email}`;
+      } else {
+        authBox.style.display = 'flex';
+        chatBox.classList.remove('active');
       }
+    });
 
-      Object.values(data).reverse().forEach(msg => {
-        const item = document.createElement('div');
-        item.className = 'message-item';
-        item.innerHTML = `
-          <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--accent-color); margin-bottom:4px;">
-            <strong>${msg.usuario}</strong>
-            <span style="opacity:0.7;">${msg.correo || ''}</span>
-          </div>
-          <div style="font-size:0.9rem;">${msg.mensaje}</div>
-        `;
-        container.appendChild(item);
+    // Envío de Mensajes a la Base de Datos
+    document.getElementById('btnSendMsg').addEventListener('click', () => {
+      const input = document.getElementById('msgInput');
+      const texto = input.value.trim();
+      if (!texto || !currentUser) return;
+
+      db.ref('mensajes').push({
+        usuario: currentUser.displayName || 'Anónimo',
+        correo: currentUser.email,
+        mensaje: texto,
+        timestamp: Date.now()
+      }).then(() => {
+        input.value = '';
+        alert('🙏 Petición/Saludo enviado con éxito.');
       });
     });
 
-    // Gatillos de Efectos
-    document.getElementById('triggerConfetti').addEventListener('click', () => {
-      db.ref('efectos_remotos').set({ tipo: 'confetti', timestamp: Date.now() });
+    // Escalado de Contadores en Tiempo Real
+    function incrementarContador(tipo) {
+      db.ref('contadores/' + tipo).transaction(val => (val || 0) + 1);
+    }
+
+    // Disparadores de Efectos desde Admin
+    db.ref('efectos_remotos').on('value', snapshot => {
+      const data = snapshot.val();
+      if (!data) return;
+
+      if (data.tipo === 'confetti') lanzarEfectoConfetti();
+      if (data.tipo === 'jets') lanzarEfectoJets();
     });
 
-    document.getElementById('triggerJets').addEventListener('click', () => {
-      db.ref('efectos_remotos').set({ tipo: 'jets', timestamp: Date.now() });
+    // Cambios de Transmisión Especial desde Admin
+    db.ref('transmision_especial').on('value', snapshot => {
+      const data = snapshot.val();
+      const iframe = document.getElementById('videoIframe');
+      if (data && data.activo && data.embedUrl) {
+        iframe.src = data.embedUrl;
+      }
     });
 
-    // Limpieza
-    document.getElementById('btnClearMessages').addEventListener('click', () => {
-      if (confirm('¿Vaciar la bandeja de mensajes?')) db.ref('mensajes').remove();
+    // Escuchador de Alertas / Avisos
+    db.ref('alerta_activa').on('value', snapshot => {
+      const alerta = snapshot.val();
+      const banner = document.getElementById('adminAlert');
+      if (alerta && alerta.texto) {
+        banner.innerText = "📢 " + alerta.texto;
+        banner.style.display = 'block';
+      } else {
+        banner.style.display = 'none';
+      }
     });
 
-    document.getElementById('btnResetCounters').addEventListener('click', () => {
-      if (confirm('¿Reiniciar contadores a cero?')) db.ref('contadores').set({ amen: 0, jets: 0 });
+    // Efectos Visuales
+    function lanzarEfectoConfetti() {
+      if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.7 } });
+    }
+
+    function lanzarEfectoJets() {
+      for (let i = 0; i < 6; i++) {
+        setTimeout(() => {
+          const plane = document.createElement('div');
+          plane.classList.add('flying-plane');
+          plane.innerText = '✈️';
+          plane.style.left = `${Math.random() * 80 + 10}%`;
+          document.body.appendChild(plane);
+          setTimeout(() => plane.remove(), 2000);
+        }, i * 150);
+      }
+    }
+
+    document.getElementById('btnAmen').addEventListener('click', () => {
+      lanzarEfectoConfetti();
+      incrementarContador('amen');
     });
 
-    // Emisión de Alerta
-    document.getElementById('btnSendAlert').addEventListener('click', () => {
-      const txt = document.getElementById('alertInput').value.trim();
-      if (txt) db.ref('alerta_activa').set({ texto: txt });
+    document.getElementById('btnPlane').addEventListener('click', () => {
+      lanzarEfectoJets();
+      incrementarContador('jets');
     });
 
-    document.getElementById('btnClearAlert').addEventListener('click', () => {
-      db.ref('alerta_activa').remove();
-      document.getElementById('alertInput').value = '';
+    // Overlay Unmute
+    document.getElementById('unmuteOverlay').addEventListener('click', function() {
+      this.classList.add('hidden');
+      document.getElementById('videoIframe').src = "https://ok.ru/videoembed/16493078060749?nochat=1&autoplay=1";
     });
 
-    // Transmisión Especial
-    document.getElementById('btnStartLive').addEventListener('click', () => {
-      const url = document.getElementById('embedInput').value.trim();
-      if (url) db.ref('transmision_especial').set({ activo: true, embedUrl: url });
-    });
-
-    document.getElementById('btnStopLive').addEventListener('click', () => {
-      db.ref('transmision_especial').set({ activo: false, embedUrl: '' });
-      document.getElementById('embedInput').value = '';
-    });
+    // Versículos
+    async function cargarVersiculo() {
+      try {
+        const res = await fetch('versiculos.txt');
+        const text = await res.text();
+        const lineas = text.split('\n').filter(l => l.trim().length > 0);
+        const hoy = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+        const [cita, ref] = lineas[(hoy - 1) % lineas.length].split('|');
+        document.getElementById('verse-text').innerText = `"${cita.trim()}"`;
+        document.getElementById('verse-ref').innerText = `— ${ref.trim()}`;
+      } catch (e) {
+        document.getElementById('verse-text').innerText = '"Seguid la paz con todos..."';
+        document.getElementById('verse-ref').innerText = '— Hebreos 12:14';
+      }
+    }
+    cargarVersiculo();
   </script>
 </body>
 </html>
