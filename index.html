@@ -13,7 +13,7 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1e293b">
 
-  <!-- Librería liviana para animación de celebración -->
+  <!-- Librería de Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
@@ -168,29 +168,42 @@
       border: none;
     }
 
-    /* Botón Interactivo "Amén" */
-    .amen-container {
+    /* Botones Interactivos de Celebración y Avión */
+    .interaction-container {
       width: 100%;
-      text-align: center;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
     }
-    .amen-btn {
-      background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+    .action-btn {
       color: white;
       font-weight: bold;
-      font-size: 1.1rem;
-      padding: 14px 28px;
+      font-size: 1.05rem;
+      padding: 14px 24px;
       border-radius: 50px;
       border: none;
       cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .amen-btn {
+      background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
       box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
-      transition: transform 0.2s, box-shadow 0.2s;
     }
-    .amen-btn:hover {
+    .plane-btn {
+      background: linear-gradient(135deg, #0284c7 0%, #10b981 100%);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    .action-btn:hover:not(:disabled) {
       transform: scale(1.05);
-      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.5);
     }
-    .amen-btn:active {
-      transform: scale(0.98);
+    .action-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      filter: grayscale(30%);
     }
 
     /* Tarjetas de información */
@@ -297,10 +310,14 @@
       </iframe>
     </div>
 
-    <!-- Botón de Interacción de Celebración -->
-    <div class="amen-container">
-      <button id="btnAmen" class="amen-btn">
-        🙌 ¡Decir Amén!
+    <!-- Botones Interactivos con Cooldown -->
+    <div class="interaction-container">
+      <button id="btnAmen" class="action-btn amen-btn">
+        🙌 <span id="txtAmen">¡Decir Amén!</span>
+      </button>
+
+      <button id="btnPlane" class="action-btn plane-btn">
+        ✈️ <span id="txtPlane">Lanzar Jet</span>
       </button>
     </div>
 
@@ -352,7 +369,6 @@
       }
     }
 
-    // Cargar preferencia previa
     const temaGuardado = localStorage.getItem('theme') || 'dark';
     aplicarTema(temaGuardado);
 
@@ -388,8 +404,33 @@
       navigator.serviceWorker.register('data:text/javascript,console.log("PWA Service Worker listo");');
     }
 
-    // Animación de Celebración al presionar "Amén"
-    document.getElementById('btnAmen').addEventListener('click', () => {
+    // Función genérica para manejar el Cooldown de 2.5s
+    function aplicarCooldown(btn, txtElement, textoOriginal, ms = 2500) {
+      btn.disabled = true;
+      let restante = (ms / 1000).toFixed(1);
+      txtElement.innerText = `Espera ${restante}s...`;
+
+      const intervalo = setInterval(() => {
+        restante = (restante - 0.5).toFixed(1);
+        if (restante > 0) {
+          txtElement.innerText = `Espera ${restante}s...`;
+        }
+      }, 500);
+
+      setTimeout(() => {
+        clearInterval(intervalo);
+        btn.disabled = false;
+        txtElement.innerText = textoOriginal;
+      }, ms);
+    }
+
+    // 1. Animación y evento para "Amén"
+    const btnAmen = document.getElementById('btnAmen');
+    const txtAmen = document.getElementById('txtAmen');
+
+    btnAmen.addEventListener('click', () => {
+      if (btnAmen.disabled) return;
+
       if (typeof confetti === 'function') {
         confetti({
           particleCount: 100,
@@ -398,6 +439,33 @@
           colors: ['#38bdf8', '#0284c7', '#ffffff', '#f59e0b']
         });
       }
+
+      aplicarCooldown(btnAmen, txtAmen, '¡Decir Amén!');
+    });
+
+    // 2. Animación y evento para "Lanzar Jet"
+    const btnPlane = document.getElementById('btnPlane');
+    const txtPlane = document.getElementById('txtPlane');
+
+    btnPlane.addEventListener('click', () => {
+      if (btnPlane.disabled) return;
+
+      if (typeof confetti === 'function') {
+        // Forma de avión usando emojis dentro del Canvas de Confetti
+        const planeShape = confetti.shapeFromText({ text: '✈️', scalar: 3 });
+
+        confetti({
+          shapes: [planeShape],
+          particleCount: 15,
+          scalar: 3,
+          spread: 80,
+          startVelocity: 35,
+          origin: { y: 0.8 },
+          ticks: 200
+        });
+      }
+
+      aplicarCooldown(btnPlane, txtPlane, 'Lanzar Jet');
     });
 
     // Versículos locales en español (RVR1960)
