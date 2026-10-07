@@ -210,6 +210,31 @@
 
     .audio-mode-card.active { display: block; }
 
+    /* Ventana de Contadores */
+    .counters-window {
+      width: 100%;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      text-align: center;
+    }
+
+    .counter-box h4 {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-bottom: 4px;
+    }
+
+    .counter-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--accent-color);
+    }
+
     .interaction-container {
       width: 100%;
       display: flex;
@@ -229,6 +254,12 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      transition: opacity 0.2s ease;
+    }
+
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .amen-btn { background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%); }
@@ -265,6 +296,34 @@
       padding: 1.5rem;
       border-radius: 12px;
       border: 1px solid var(--border-color);
+    }
+
+    /* Historial del Chat */
+    .chat-history {
+      max-height: 250px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: var(--bg-color);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .chat-message-item {
+      padding: 8px 12px;
+      background-color: var(--card-bg);
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    .chat-message-author {
+      font-weight: bold;
+      color: var(--accent-color);
+      margin-right: 6px;
     }
 
     .auth-box {
@@ -411,15 +470,33 @@
       <p>El reproductor visual está oculto para ahorrar datos.</p>
     </div>
 
-    <!-- Botones Interactivos con Contadores de Firebase -->
-    <div class="interaction-container">
-      <button id="btnAmen" class="action-btn amen-btn">🙌 ¡Decir Amén! (<span id="countAmen">0</span>)</button>
-      <button id="btnPlane" class="action-btn plane-btn">✈️ Lanzar Jet (<span id="countJets">0</span>)</button>
+    <!-- Ventana de Contadores Independiente -->
+    <div class="counters-window">
+      <div class="counter-box">
+        <h4>🙌 Amén Registrados</h4>
+        <div class="counter-value" id="countAmen">0</div>
+      </div>
+      <div style="width: 1px; height: 40px; background-color: var(--border-color);"></div>
+      <div class="counter-box">
+        <h4>✈️ Jets Lanzados</h4>
+        <div class="counter-value" id="countJets">0</div>
+      </div>
     </div>
 
-    <!-- Sección de Autenticación y Mensajería -->
+    <!-- Botones Interactivos -->
+    <div class="interaction-container">
+      <button id="btnAmen" class="action-btn amen-btn">🙌 ¡Decir Amén!</button>
+      <button id="btnPlane" class="action-btn plane-btn">✈️ Lanzar Jet</button>
+    </div>
+
+    <!-- Sección de Autenticación y Mensajería con Historial de Chat -->
     <div class="auth-chat-card">
       <h3>💬 Peticiones de Oración y Saludos</h3>
+
+      <!-- Historial Visible de Mensajes -->
+      <div id="chatHistory" class="chat-history">
+        <p style="opacity: 0.6; text-align: center; font-size: 0.85rem;">Cargando mensajes del chat...</p>
+      </div>
 
       <!-- Estado: No autenticado -->
       <div id="authBox" class="auth-box">
@@ -518,8 +595,29 @@
         timestamp: Date.now()
       }).then(() => {
         input.value = '';
-        alert('🙏 Petición/Saludo enviado con éxito.');
       });
+    });
+
+    // Cargar Historial del Chat en Tiempo Real
+    db.ref('mensajes').on('value', snapshot => {
+      const historyContainer = document.getElementById('chatHistory');
+      historyContainer.innerHTML = '';
+      const data = snapshot.val();
+
+      if (!data) {
+        historyContainer.innerHTML = '<p style="opacity: 0.6; text-align: center; font-size: 0.85rem;">No hay mensajes registrados aún. ¡Sé el primero en enviar uno!</p>';
+        return;
+      }
+
+      Object.keys(data).forEach(key => {
+        const item = data[key];
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'chat-message-item';
+        msgDiv.innerHTML = `<span class="chat-message-author">${item.usuario || 'Anónimo'}:</span> <span>${item.mensaje}</span>`;
+        historyContainer.appendChild(msgDiv);
+      });
+
+      historyContainer.scrollTop = historyContainer.scrollHeight;
     });
 
     // Leer Contadores en Tiempo Real desde Firebase
@@ -586,14 +684,36 @@
       }
     }
 
-    document.getElementById('btnAmen').addEventListener('click', () => {
+    // Lógica de Cooldowns
+    const btnAmen = document.getElementById('btnAmen');
+    const btnPlane = document.getElementById('btnPlane');
+
+    function aplicarCooldown(button, originalText, segundos) {
+      button.disabled = true;
+      let tiempoRestante = segundos;
+
+      const timer = setInterval(() => {
+        button.innerText = `⏳ Espera ${tiempoRestante}s`;
+        tiempoRestante--;
+
+        if (tiempoRestante < 0) {
+          clearInterval(timer);
+          button.innerText = originalText;
+          button.disabled = false;
+        }
+      }, 1000);
+    }
+
+    btnAmen.addEventListener('click', () => {
       lanzarEfectoConfetti();
       incrementarContador('amen');
+      aplicarCooldown(btnAmen, '🙌 ¡Decir Amén!', 5);
     });
 
-    document.getElementById('btnPlane').addEventListener('click', () => {
+    btnPlane.addEventListener('click', () => {
       lanzarEfectoJets();
       incrementarContador('jets');
+      aplicarCooldown(btnPlane, '✈️ Lanzar Jet', 10);
     });
 
     // Overlay Unmute
