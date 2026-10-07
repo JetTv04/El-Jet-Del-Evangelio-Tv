@@ -1,169 +1,207 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>El Jet del Evangelio Web-Tv</title>
-    
-    <!-- PWA Manifest & Icons -->
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="icon.png">
-    <meta name="theme-color" content="#121212">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Jet del Evangelio Web-Tv - En Vivo</title>
+  
+  <!-- Icono del navegador y PWA -->
+  <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Plane_icon_font_awesome.svg/512px-Plane_icon_font_awesome.svg.png">
+  <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Plane_icon_font_awesome.svg/512px-Plane_icon_font_awesome.svg.png">
+  
+  <!-- Manifest para PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e293b">
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background-color: #1e293b;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #334155;
+    }
+    .logo-container h1 {
+      font-size: 1.3rem;
+      color: #ffffff;
+    }
+    .live-badge {
+      background-color: #ef4444;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 4px 10px;
+      border-radius: 4px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem;
+      max-width: 1000px;
+      margin: 0 auto;
+      width: 100%;
+      gap: 1.5rem;
+    }
 
-        body {
-            background-color: #121212;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
+    /* Banner personalizado */
+    .banner-header {
+      width: 100%;
+      background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%);
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      border: 1px solid #38bdf8;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+    .banner-header h2 {
+      font-size: 1.8rem;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+    .banner-header p {
+      color: #e0f2fe;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
 
-        header {
-            width: 100%;
-            padding: 20px;
-            background-color: #1f1f1f;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-        }
+    /* Botón de Instalar PWA */
+    .install-btn {
+      display: inline-block;
+      background-color: #22c55e;
+      color: white;
+      font-weight: bold;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    .install-btn:hover {
+      background-color: #16a34a;
+      transform: translateY(-2px);
+    }
 
-        h1 {
-            font-size: 1.5rem;
-            color: #ffffff;
-        }
+    /* Contenedor del video */
+    .video-wrapper {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background-color: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      border: 1px solid #334155;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
 
-        main {
-            width: 100%;
-            max-width: 900px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    /* Tarjeta de redes sociales y Versículo */
+    .info-card {
+      width: 100%;
+      background-color: #1e293b;
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid #334155;
+    }
+    .info-card h3 {
+      font-size: 1.1rem;
+      color: #38bdf8;
+      margin-bottom: 1rem;
+    }
+    .social-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .social-btn:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
 
-        /* Tarjeta de Versículo del Día */
-        .verse-card {
-            width: 100%;
-            background: #1f1f1f;
-            color: #ffffff;
-            padding: 18px 20px;
-            border-radius: 12px;
-            border-left: 4px solid #ffcc00;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            text-align: left;
-        }
+    .btn-radio { background-color: #0284c7; }
+    .btn-youtube { background-color: #ff0000; }
+    .btn-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
 
-        .verse-title {
-            color: #ffcc00;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
+    /* Estilos del Versículo del Día */
+    .verse-card {
+      border-left: 4px solid #38bdf8;
+    }
+    .verse-text {
+      font-style: italic;
+      font-size: 1.05rem;
+      line-height: 1.5;
+      color: #f1f5f9;
+      margin-bottom: 0.75rem;
+    }
+    .verse-ref {
+      font-size: 0.9rem;
+      color: #38bdf8;
+      font-weight: 600;
+      display: block;
+      text-align: right;
+    }
 
-        .verse-text {
-            font-style: italic;
-            font-size: 1.05rem;
-            line-height: 1.5;
-            color: #e0e0e0;
-            margin-bottom: 8px;
-        }
-
-        .verse-ref {
-            font-size: 0.9rem;
-            color: #aaa;
-            font-weight: 600;
-            display: block;
-            text-align: right;
-        }
-
-        .video-container {
-            width: 100%;
-            position: relative;
-            padding-bottom: 56.25%; /* Aspect Ratio 16:9 */
-            height: 0;
-            background-color: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 0;
-        }
-    </style>
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: #64748b;
+      font-size: 0.85rem;
+      border-top: 1px solid #334155;
+      margin-top: auto;
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <h1>El Jet del Evangelio Web-Tv</h1>
-    </header>
+  <header>
+    <div class="logo-container">
+      <h1>✈️ El Jet del Evangelio Web-Tv</h1>
+    </div>
+    <span class="live-badge">EN VIVO</span>
+  </header>
 
-    <main>
-        <!-- Bloque del Versículo del Día en Español -->
-        <div class="verse-card">
-            <span class="verse-title">📖 Versículo del Día</span>
-            <p class="verse-text" id="verse-text">Cargando la Palabra de hoy...</p>
-            <span class="verse-ref" id="verse-ref"></span>
-        </div>
-
-        <div class="video-container">
-            <iframe src="https://ok.ru/videoembed/8982390111933?nochat=1" allowfullscreen></iframe>
-        </div>
-    </main>
-
-    <script>
-        // Registrar Service Worker para PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./webpushr-sw.js').catch(err => {
-                    console.log('Error al registrar SW:', err);
-                });
-            });
-        }
-
-        // Obtener Versículo del Día en Español (RVR1960)
-        async function cargarVersiculoEspanol() {
-            try {
-                const res = await fetch('https://dailyverses.net/get/verse.json?language=es');
-                const data = await res.json();
-                
-                // Extraer el texto limpio quitando etiquetas HTML si vienen en la respuesta
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = data.html;
-                
-                const texto = tempDiv.querySelector('.v1')?.innerText || tempDiv.innerText;
-                const referencia = tempDiv.querySelector('.vc a')?.innerText || '';
-
-                document.getElementById('verse-text').innerText = `"${texto.trim()}"`;
-                document.getElementById('verse-ref').innerText = `— ${referencia.trim()} (RVR1960)`;
-            } catch (error) {
-                // Versículo de respaldo en español en caso de no cargar la red
-                document.getElementById('verse-text').innerText = '"Seguid la paz con todos, y la santidad, sin la cual nadie verá al Señor."';
-                document.getElementById('verse-ref').innerText = '— Hebreos 12:14 (RVR1960)';
-            }
-        }
-
-        cargarVersiculoEspanol();
-    </script>
-
-</body>
-</html>
+  <main>
+    <!-- Banner Principal -->
+    <div class="banner-header">
+      <h2>✈️ El Jet del Evangelio Web-Tv</h2>
+      <p>Llevando el mensaje de fe, esperanza y alabanza a todas las naciones</p>
+      
+      <!--
