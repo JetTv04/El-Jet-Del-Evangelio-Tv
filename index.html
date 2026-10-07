@@ -5,13 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>El Jet del Evangelio Web-Tv - En Vivo</title>
   
-  <!-- Icono del navegador y PWA -->
-  <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Plane_icon_font_awesome.svg/512px-Plane_icon_font_awesome.svg.png">
-  <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Plane_icon_font_awesome.svg/512px-Plane_icon_font_awesome.svg.png">
+  <!-- Icono local del navegador y PWA -->
+  <link rel="icon" type="image/png" href="./icon.png">
+  <link rel="apple-touch-icon" href="./icon.png">
   
   <!-- Manifest para PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1e293b">
+
+  <!-- Integración de Webpushr para Notificaciones Push -->
+  <!-- start webpushr code --> 
+  <script>(function(w,d, s, id) {if(typeof(w.webpushr)!=='undefined') return;w.webpushr=w.webpushr||function(){(w.webpushr.q=w.webpushr.q||[]).push(arguments)};var js, fjs = d.getElementsByTagName(s)[0];js = d.createElement(s); js.id = id;js.async=1;js.src = "https://cdn.webpushr.com/app.min.js";fjs.parentNode.appendChild(js);}(window,document, 'script', 'webpushr-jssdk'));webpushr('setup',{'key':'BP1LOo-zgw9aIF3ei16h0C-JKNnJYfoWiuKcXbo0ywUMxZKf-pJ01TMaGkVPAg8Xfb0oJ6pqRgWAbqzGOhTy0bk' });</script>
+  <!-- end webpushr code -->
 
   <style>
     * {
@@ -159,6 +164,7 @@
     .btn-radio { background-color: #0284c7; }
     .btn-youtube { background-color: #ff0000; }
     .btn-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+    .btn-whatsapp { background-color: #25d366; }
 
     footer {
       text-align: center;
@@ -185,7 +191,7 @@
       <h2>✈️ El Jet del Evangelio Web-Tv</h2>
       <p>Llevando el mensaje de fe, esperanza y alabanza a todas las naciones</p>
       
-      <!-- Botón de instalación -->
+      <!-- Botón dinámico de instalación PWA -->
       <button id="btnInstall" class="install-btn" style="display: none;">
         📲 Instalar Aplicación Web
       </button>
@@ -215,6 +221,11 @@
         <a href="https://www.instagram.com/carolpaz820" target="_blank" class="social-btn btn-instagram">
           📸 Instagram
         </a>
+
+        <!-- Botón para contacto/comunidad por WhatsApp (Opcional, reemplaza con tu número o enlace de canal) -->
+        <a href="https://wa.me/50400000000" target="_blank" class="social-btn btn-whatsapp">
+          💬 Peticiones por WhatsApp
+        </a>
       </div>
     </div>
   </main>
@@ -223,6 +234,7 @@
     &copy; 2026 El Jet del Evangelio Web-Tv — Todos los derechos reservados.
   </footer>
 
+  <!-- Script para la instalación de la App -->
   <script>
     let deferredPrompt;
     const btnInstall = document.getElementById('btnInstall');
