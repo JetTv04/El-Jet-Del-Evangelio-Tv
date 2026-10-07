@@ -17,6 +17,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 
   <style>
     :root {
@@ -210,6 +211,7 @@
 
     .audio-mode-card.active { display: block; }
 
+    /* Ventana de Contadores Ampliada */
     .counters-window {
       width: 100%;
       background-color: var(--card-bg);
@@ -223,15 +225,19 @@
     }
 
     .counter-box h4 {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       opacity: 0.8;
       margin-bottom: 4px;
     }
 
     .counter-value {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       font-weight: 800;
       color: var(--accent-color);
+    }
+
+    .online-badge-text {
+      color: #10b981;
     }
 
     .interaction-container {
@@ -263,6 +269,32 @@
 
     .amen-btn { background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%); }
     .plane-btn { background: linear-gradient(135deg, #0284c7 0%, #10b981 100%); }
+
+    .notify-card {
+      width: 100%;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .notify-card p { font-size: 0.9rem; }
+
+    .notify-btn {
+      background-color: #10b981;
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
 
     .flying-plane {
       position: fixed;
@@ -468,15 +500,26 @@
       <p>El reproductor visual está oculto para ahorrar datos.</p>
     </div>
 
-    <!-- Ventana de Contadores Independiente -->
+    <!-- Banner para Activar Notificaciones Push -->
+    <div id="notifyCard" class="notify-card">
+      <p>🔔 <strong>¿Quieres recibir avisos en tu teléfono cuando iniciemos un En Vivo?</strong></p>
+      <button id="btnEnableNotify" class="notify-btn">Activar Notificaciones</button>
+    </div>
+
+    <!-- Ventana de Contadores Ampliada con Gente en Línea -->
     <div class="counters-window">
       <div class="counter-box">
-        <h4>🙌 Amén Registrados</h4>
+        <h4>🔴 En Línea</h4>
+        <div class="counter-value online-badge-text" id="countOnline">1</div>
+      </div>
+      <div style="width: 1px; height: 35px; background-color: var(--border-color);"></div>
+      <div class="counter-box">
+        <h4>🙌 Amén</h4>
         <div class="counter-value" id="countAmen">0</div>
       </div>
-      <div style="width: 1px; height: 40px; background-color: var(--border-color);"></div>
+      <div style="width: 1px; height: 35px; background-color: var(--border-color);"></div>
       <div class="counter-box">
-        <h4>✈️ Jets Lanzados</h4>
+        <h4>✈️ Jets</h4>
         <div class="counter-value" id="countJets">0</div>
       </div>
     </div>
@@ -491,12 +534,10 @@
     <div class="auth-chat-card">
       <h3>💬 Peticiones de Oración y Saludos</h3>
 
-      <!-- Historial Visible de Mensajes -->
       <div id="chatHistory" class="chat-history">
         <p style="opacity: 0.6; text-align: center; font-size: 0.85rem;">Cargando mensajes del chat...</p>
       </div>
 
-      <!-- Estado: No autenticado -->
       <div id="authBox" class="auth-box">
         <p style="font-size:0.9rem; opacity:0.8;">Inicia sesión para enviar tu mensaje en vivo a la transmisión:</p>
         <button id="btnGoogleLogin" class="google-btn">
@@ -505,7 +546,6 @@
         </button>
       </div>
 
-      <!-- Estado: Autenticado -->
       <div id="chatBox" class="chat-box">
         <div class="user-info-bar">
           <span id="userName">Hola, Usuario</span>
@@ -554,10 +594,56 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
+    const messaging = firebase.messaging();
 
     let currentUser = null;
 
-    // Autenticación con Google
+    // --- CONTADOR DE GENTE EN LÍNEA (PRESENCIA REALTIME) ---
+    const connectedRef = db.ref('.info/connected');
+    const onlineUsersRef = db.ref('conectados');
+
+    connectedRef.on('value', snap => {
+      if (snap.val() === true) {
+        const con = onlineUsersRef.push();
+        con.onDisconnect().remove();
+        con.set(true);
+      }
+    });
+
+    onlineUsersRef.on('value', snap => {
+      const count = snap.numChildren() || 1;
+      document.getElementById('countOnline').innerText = count;
+    });
+
+    // --- REGISTRO Y GESTIÓN DE NOTIFICACIONES PWA ---
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').then(reg => {
+        messaging.useServiceWorker(reg);
+      }).catch(err => console.log('SW Error:', err));
+    }
+
+    const btnEnableNotify = document.getElementById('btnEnableNotify');
+    const notifyCard = document.getElementById('notifyCard');
+
+    if (Notification.permission === 'granted') {
+      notifyCard.style.display = 'none';
+    }
+
+    btnEnableNotify.addEventListener('click', () => {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          messaging.getToken({ vapidKey: 'YOUR_VAPID_KEY_IF_NEEDED' }).then(token => {
+            if (token) {
+              db.ref('fcm_tokens/' + token).set(true);
+            }
+          });
+          notifyCard.style.display = 'none';
+          alert('¡Notificaciones activadas con éxito! Te avisaremos al iniciar transmisiones.');
+        }
+      });
+    });
+
+    // --- AUTENTICACIÓN GOOGLE ---
     document.getElementById('btnGoogleLogin').addEventListener('click', () => {
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider).catch(err => alert("Error al iniciar sesión: " + err.message));
@@ -580,7 +666,7 @@
       }
     });
 
-    // Envío de Mensajes a la Base de Datos
+    // --- MENSAJERÍA / CHAT ---
     document.getElementById('btnSendMsg').addEventListener('click', () => {
       const input = document.getElementById('msgInput');
       const texto = input.value.trim();
@@ -596,7 +682,6 @@
       });
     });
 
-    // Cargar Historial del Chat en Tiempo Real
     db.ref('mensajes').on('value', snapshot => {
       const historyContainer = document.getElementById('chatHistory');
       historyContainer.innerHTML = '';
@@ -618,7 +703,7 @@
       historyContainer.scrollTop = historyContainer.scrollHeight;
     });
 
-    // Leer Contadores en Tiempo Real desde Firebase
+    // --- CONTADORES GLOBALES (AMÉN Y JETS) ---
     db.ref('contadores').on('value', snapshot => {
       const data = snapshot.val() || {};
       document.getElementById('countAmen').innerText = data.amen || 0;
@@ -629,18 +714,7 @@
       db.ref('contadores/' + tipo).transaction(val => (val || 0) + 1);
     }
 
-    // Disparadores de Efectos Remotos desde Admin
-    let ultimoEfectoTime = 0;
-    db.ref('efectos_remotos').on('value', snapshot => {
-      const data = snapshot.val();
-      if (data && data.timestamp > ultimoEfectoTime) {
-        ultimoEfectoTime = data.timestamp;
-        if (data.tipo === 'confetti') lanzarEfectoConfetti();
-        if (data.tipo === 'jets') lanzarEfectoJets();
-      }
-    });
-
-    // Escuchador optimizado para Transmisión Especial (Facebook, YouTube, OK.ru)
+    // --- TRANSMISIÓN ESPECIAL ---
     db.ref('transmision_especial').on('value', snapshot => {
       const data = snapshot.val();
       const iframe = document.getElementById('videoIframe');
@@ -649,20 +723,17 @@
       if (data && data.activo && data.embedUrl) {
         let url = data.embedUrl.trim();
 
-        // 1. Extrae la URL si se pegó el código iframe HTML por error
         if (url.includes('src=')) {
           const match = url.match(/src=["']([^"']+)["']/);
           if (match && match[1]) url = match[1];
         }
 
-        // 2. Convierte enlaces estándar de YouTube a Embed
         if (url.includes('youtube.com/watch?v=')) {
           url = url.replace('watch?v=', 'embed/');
         } else if (url.includes('youtu.be/')) {
           url = url.replace('youtu.be/', 'www.youtube.com/embed/');
         }
 
-        // 3. Limpia entidades HTML (&amp; -> &)
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = url;
         url = tempDiv.innerText;
@@ -678,7 +749,7 @@
       }
     });
 
-    // Escuchador de Alertas / Avisos desde Admin
+    // --- ALERTAS DESDE ADMIN ---
     db.ref('alerta_activa').on('value', snapshot => {
       const alerta = snapshot.val();
       const banner = document.getElementById('adminAlert');
@@ -690,7 +761,7 @@
       }
     });
 
-    // Efectos Visuales
+    // --- EFECTOS Y COOLDOWNS ---
     function lanzarEfectoConfetti() {
       if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.7 } });
     }
@@ -708,7 +779,6 @@
       }
     }
 
-    // Lógica de Cooldowns
     const btnAmen = document.getElementById('btnAmen');
     const btnPlane = document.getElementById('btnPlane');
 
@@ -740,12 +810,11 @@
       aplicarCooldown(btnPlane, '✈️ Lanzar Jet', 10);
     });
 
-    // Overlay Unmute
     document.getElementById('unmuteOverlay').addEventListener('click', function() {
       this.classList.add('hidden');
     });
 
-    // Conmutadores de Modo Audio y Tema
+    // --- MODO AUDIO Y TEMA ---
     const audioToggle = document.getElementById('audioToggle');
     const videoContainer = document.getElementById('videoContainer');
     const audioContainer = document.getElementById('audioContainer');
@@ -773,7 +842,7 @@
       document.getElementById('themeText').innerText = isLight ? 'Claro' : 'Oscuro';
     });
 
-    // Versículo del día
+    // --- VERSÍCULO DEL DÍA ---
     async function cargarVersiculo() {
       try {
         const res = await fetch('versiculos.txt');
