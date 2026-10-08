@@ -160,6 +160,61 @@
       100% { opacity: 0.9; }
     }
 
+    /* --- ANIMACIÓN Y ESTILOS DEL JET CON PANCARTA --- */
+    .jet-banner-fly-container {
+      position: fixed;
+      top: 18%;
+      left: -1200px;
+      display: none;
+      align-items: center;
+      gap: 0px;
+      z-index: 99999;
+      pointer-events: none;
+      animation: flyBannerAcross 12s linear infinite;
+    }
+
+    @keyframes flyBannerAcross {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(calc(100vw + 1600px));
+      }
+    }
+
+    .jet-banner-img {
+      height: 60px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+      z-index: 2;
+    }
+
+    .jet-banner-text {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 1.05rem;
+      padding: 10px 22px;
+      border-radius: 4px 12px 12px 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border: 2px solid #fef3c7;
+      white-space: nowrap;
+      position: relative;
+      margin-left: -5px;
+    }
+
+    .jet-banner-text::before {
+      content: '';
+      position: absolute;
+      left: -15px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 15px;
+      height: 2px;
+      background-color: #fef3c7;
+    }
+
     .media-wrapper {
       position: relative;
       width: 100%;
@@ -562,6 +617,12 @@
 </head>
 <body>
 
+  <!-- Elemento Flotante: Jet con Pancarta -->
+  <div id="jetBannerFlyContainer" class="jet-banner-fly-container">
+    <img id="jetBannerFlyImg" class="jet-banner-img" src="avion.gif" alt="Jet">
+    <div id="jetBannerFlyText" class="jet-banner-text">¡Bienvenido a la Transmisión!</div>
+  </div>
+
   <!-- Capa Oscura y Botón de Salida Modo Cine -->
   <div id="cinemaOverlay" onclick="toggleCinemaMode()"></div>
   <button id="btnExitCinema" onclick="toggleCinemaMode()">❌ Salir de Modo Cine</button>
@@ -715,6 +776,26 @@
     const messaging = firebase.messaging();
 
     let currentUser = null;
+
+    // --- RECEPTOR EN TIEMPO REAL DEL JET CON PANCARTA ---
+    db.ref('jet_pancarta_activa').on('value', snap => {
+      const data = snap.val();
+      const flyContainer = document.getElementById('jetBannerFlyContainer');
+      const flyText = document.getElementById('jetBannerFlyText');
+      const flyImg = document.getElementById('jetBannerFlyImg');
+
+      if (data && data.mensaje) {
+        flyText.innerText = data.mensaje;
+        if (data.imagenUrl) {
+          flyImg.src = data.imagenUrl;
+        } else {
+          flyImg.src = 'avion.gif';
+        }
+        flyContainer.style.display = 'flex';
+      } else {
+        flyContainer.style.display = 'none';
+      }
+    });
 
     // --- LÓGICA DE MODO CINE ---
     function toggleCinemaMode() {
