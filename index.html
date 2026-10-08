@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>El Jet del Evangelio Web-Tv - En Vivo</title>
   
-  <link rel="icon" type="image/gif" href="avion.gif">
-  <link rel="apple-touch-icon" href="avion.gif">
+  <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Plane_icon_font_awesome.svg/512px-Plane_icon_font_awesome.svg.png">
+  <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Plane_icon_font_awesome.svg/512px-Plane_icon_font_awesome.svg.png">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1e293b">
 
@@ -59,18 +59,6 @@
       border-bottom: 1px solid var(--border-color);
       flex-wrap: wrap;
       gap: 10px;
-    }
-
-    .logo-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .logo-container img {
-      width: 32px;
-      height: 32px;
-      object-fit: contain;
     }
 
     .logo-container h1 { font-size: 1.2rem; color: var(--text-color); }
@@ -127,16 +115,6 @@
       text-align: center;
       border: 1px solid #38bdf8;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .banner-header img {
-      width: 60px;
-      height: 60px;
-      margin-bottom: 10px;
-      object-fit: contain;
     }
 
     .banner-header h2 { font-size: 1.8rem; color: #ffffff; margin-bottom: 0.5rem; }
@@ -296,10 +274,6 @@
       font-size: 0.85rem;
       opacity: 0.8;
       margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
     }
 
     .counter-value {
@@ -332,12 +306,6 @@
       align-items: center;
       gap: 8px;
       transition: opacity 0.2s ease;
-    }
-
-    .action-btn img {
-      width: 24px;
-      height: 24px;
-      object-fit: contain;
     }
 
     .action-btn:disabled {
@@ -374,44 +342,19 @@
       font-size: 0.85rem;
     }
 
-    /* --- FRANJA / PISTA BLANCA PARA ANIMACIÓN DE AVIONES --- */
-    #planeTrack {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: rgba(255, 255, 255, 0.95);
-      z-index: 9998;
-      display: none;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-
-    #planeTrack.active {
-      display: block;
-    }
-
     .flying-plane {
       position: fixed;
-      bottom: -80px;
-      width: 70px;
-      height: 70px;
+      bottom: -50px;
+      font-size: 2.5rem;
       user-select: none;
       pointer-events: none;
       z-index: 9999;
-      animation: flyUp 2.2s ease-out forwards;
-    }
-
-    .flying-plane img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+      animation: flyUp 2s ease-out forwards;
     }
 
     @keyframes flyUp {
-      0% { transform: translateY(0) scale(0.7); opacity: 1; }
-      100% { transform: translateY(-120vh) scale(1.3); opacity: 0; }
+      0% { transform: translateY(0) scale(0.6); opacity: 1; }
+      100% { transform: translateY(-110vh) scale(1.3); opacity: 0; }
     }
 
     .info-card {
@@ -566,13 +509,9 @@
   <div id="cinemaOverlay" onclick="toggleCinemaMode()"></div>
   <button id="btnExitCinema" onclick="toggleCinemaMode()">❌ Salir de Modo Cine</button>
 
-  <!-- Franja/Cuadro Blanco de fondo para la animación de los Aviones -->
-  <div id="planeTrack"></div>
-
   <header>
     <div class="logo-container">
-      <img src="avion.gif" alt="Avión Jet">
-      <h1>El Jet del Evangelio Web-Tv</h1>
+      <h1>✈️ El Jet del Evangelio Web-Tv</h1>
     </div>
     <div class="header-actions">
       <button id="cinemaToggle" class="action-toggle-btn" onclick="toggleCinemaMode()">
@@ -590,8 +529,7 @@
 
   <main>
     <div class="banner-header">
-      <img src="avion.gif" alt="Avión Jet Animado">
-      <h2>El Jet del Evangelio Web-Tv</h2>
+      <h2>✈️ El Jet del Evangelio Web-Tv</h2>
       <p>Llevando el mensaje de fe, esperanza y alabanza a todas las naciones</p>
     </div>
 
@@ -634,7 +572,7 @@
       </div>
       <div style="width: 1px; height: 35px; background-color: var(--border-color);"></div>
       <div class="counter-box">
-        <h4><img src="avion.gif" style="width: 18px; height: 18px; vertical-align: middle;"> Jets</h4>
+        <h4>✈️ Jets</h4>
         <div class="counter-value" id="countJets">0</div>
       </div>
     </div>
@@ -642,10 +580,7 @@
     <!-- Botones Interactivos -->
     <div class="interaction-container">
       <button id="btnAmen" class="action-btn amen-btn">🙌 ¡Decir Amén!</button>
-      <button id="btnPlane" class="action-btn plane-btn">
-        <img src="avion.gif" alt="Jet">
-        <span>Lanzar Jet</span>
-      </button>
+      <button id="btnPlane" class="action-btn plane-btn">✈️ Lanzar Jet</button>
     </div>
 
     <!-- Sección de Autenticación y Mensajería con Historial de Chat -->
@@ -901,36 +836,22 @@
     }
 
     function lanzarEfectoJets() {
-      const planeTrack = document.getElementById('planeTrack');
-      planeTrack.classList.add('active');
-
       for (let i = 0; i < 6; i++) {
         setTimeout(() => {
           const plane = document.createElement('div');
           plane.classList.add('flying-plane');
-          
-          const img = document.createElement('img');
-          img.src = 'avion.gif';
-          img.alt = 'Jet en vuelo';
-          
-          plane.appendChild(img);
+          plane.innerText = '✈️';
           plane.style.left = `${Math.random() * 80 + 10}%`;
           document.body.appendChild(plane);
-
-          setTimeout(() => plane.remove(), 2200);
+          setTimeout(() => plane.remove(), 2000);
         }, i * 150);
       }
-
-      // Ocultar el cuadro blanco cuando finalice el vuelo de los aviones
-      setTimeout(() => {
-        planeTrack.classList.remove('active');
-      }, 3000);
     }
 
     const btnAmen = document.getElementById('btnAmen');
     const btnPlane = document.getElementById('btnPlane');
 
-    function aplicarCooldown(button, originalHTML, segundos) {
+    function aplicarCooldown(button, originalText, segundos) {
       button.disabled = true;
       let tiempoRestante = segundos;
 
@@ -940,7 +861,7 @@
 
         if (tiempoRestante < 0) {
           clearInterval(timer);
-          button.innerHTML = originalHTML;
+          button.innerText = originalText;
           button.disabled = false;
         }
       }, 1000);
@@ -955,7 +876,7 @@
     btnPlane.addEventListener('click', () => {
       lanzarEfectoJets();
       incrementarContador('jets');
-      aplicarCooldown(btnPlane, '<img src="avion.gif" alt="Jet"> <span>Lanzar Jet</span>', 10);
+      aplicarCooldown(btnPlane, '✈️ Lanzar Jet', 10);
     });
 
     document.getElementById('unmuteOverlay').addEventListener('click', function() {
