@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Jet del Evangelio Web-Tv - En Vivo</title>
+  
+  <link rel="icon" type="image/gif" href="avion.gif">
+  <link rel="apple-touch-icon" href="avion.gif">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e293b">
+
+  <!-- Librerías Externas -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Firebase SDKs via CDN -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --header-bg: #1e293b;
+      --card-bg: #1e293b;
+      --text-color: #f8fafc;
+      --border-color: #334155;
+      --accent-color: #38bdf8;
+    }
+
+    body.light-mode {
+      --bg-color: #f1f5f9;
+      --header-bg: #ffffff;
+      --card-bg: #ffffff;
+      --text-color: #0f172a;
+      --border-color: #cbd5e1;
+      --accent-color: #0284c7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    header {
+      background-color: var(--header-bg);
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-container img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+
+    .logo-container h1 { font-size: 1.2rem; color: var(--text-color); }
+
+    .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .action-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+
+    .action-toggle-btn.active {
+      background-color: var(--accent-color);
+      color: #0f172a;
+      border-color: var(--accent-color);
+      font-weight: bold;
+    }
+
+    .live-badge {
+      background-color: #ef4444;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem;
+      max-width: 1000px;
+      margin: 0 auto;
+      width: 100%;
+      gap: 1.5rem;
+    }
+
+    .banner-header {
+      width: 100%;
+      background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%);
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      border: 1px solid #38bdf8;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .banner-header img {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 10px;
+      object-fit: contain;
+    }
+
+    .banner-header h2 { font-size: 1.8rem; color: #ffffff; margin-bottom: 0.5rem; }
+    .banner-header p { color: #e0f2fe; font-size: 1rem; margin-bottom: 1rem; }
+
+    .admin-alert-banner {
+      display: none;
+      width: 100%;
+      background-color: #f59e0b;
+      color: #000;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-align: center;
+      animation: pulseAlert 2s infinite;
+    }
+
+    @keyframes pulseAlert {
+      0% { opacity: 0.9; }
+      50% { opacity: 1; }
+      100% { opacity: 0.9; }
+    }
+
+    .media-wrapper {
+      position: relative;
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      background-color: #000;
+      transition: all 0.4s ease;
+    }
+
+    .video-wrapper {
+      aspect-ratio: 16 / 9;
+      width: 100%;
+    }
+
+    iframe { width: 100%; height: 100%; border: none; }
+
+    /* --- ESTILOS MODO CINE --- */
+    #cinemaOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(5, 7, 15, 0.96);
+      z-index: 9998;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    body.cinema-mode #cinemaOverlay {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    body.cinema-mode #videoContainer {
+      position: relative;
+      z-index: 9999;
+      box-shadow: 0 0 50px rgba(56, 189, 248, 0.4);
+    }
+
+    #btnExitCinema {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+      display: none;
+    }
+
+    body.cinema-mode #btnExitCinema {
+      display: block;
+    }
+
+    .unmute-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      cursor: pointer;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .unmute-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .unmute-btn {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      font-weight: bold;
+      font-size: 1.1rem;
+      padding: 14px 28px;
+      border-radius: 50px;
+      border: 2px solid #fca5a5;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: pulse-btn 1.5s infinite;
+    }
+
+    @keyframes pulse-btn {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    .audio-mode-card {
+      display: none;
+      width: 100%;
+      background-color: var(--card-bg);
+      padding: 2rem 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid var(--accent-color);
+    }
+
+    .audio-mode-card.active { display: block; }
+
+    /* Ventana de Contadores Ampliada */
+    .counters-window {
+      width: 100%;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      text-align: center;
+    }
+
+    .counter-box h4 {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .counter-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--accent-color);
+    }
+
+    .online-badge-text {
+      color: #10b981;
+    }
+
+    .interaction-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      padding: 12px 24px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s ease;
+    }
+
+    .action-btn img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .amen-btn { background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%); }
+    .plane-btn { background: linear-gradient(135deg, #0284c7 0%, #10b981 100%); }
+
+    .notify-card {
+      width: 100%;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .notify-card p { font-size: 0.9rem; }
+
+    .notify-btn {
+      background-color: #10b981;
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    /* --- FRANJA / PISTA BLANCA PARA ANIMACIÓN DE AVIONES --- */
+    #planeTrack {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(255, 255, 255, 0.95);
+      z-index: 9998;
+      display: none;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    #planeTrack.active {
+      display: block;
+    }
+
+    .flying-plane {
+      position: fixed;
+      bottom: -80px;
+      width: 70px;
+      height: 70px;
+      user-select: none;
+      pointer-events: none;
+      z-index: 9999;
+      animation: flyUp 2.2s ease-out forwards;
+    }
+
+    .flying-plane img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    @keyframes flyUp {
+      0% { transform: translateY(0) scale(0.7); opacity: 1; }
+      100% { transform: translateY(-120vh) scale(1.3); opacity: 0; }
+    }
+
+    .info-card {
+      width: 100%;
+      background-color: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .info-card h3 { font-size: 1.1rem; color: var(--accent-color); margin-bottom: 1rem; }
+
+    .auth-chat-card {
+      width: 100%;
+      background-color: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .chat-history {
+      max-height: 250px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: var(--bg-color);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .chat-message-item {
+      padding: 8px 12px;
+      background-color: var(--card-bg);
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    .chat-message-author {
+      font-weight: bold;
+      color: var(--accent-color);
+      margin-right: 6px;
+    }
+
+    .auth-box {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .google-btn {
+      background-color: #ffffff;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chat-box {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chat-box.active { display: flex; }
+
+    .chat-input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-input-group textarea {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .chat-input-group button {
+      background-color: var(--accent-color);
+      color: #0f172a;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .user-info-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--accent-color);
+      margin-bottom: 8px;
+    }
+
+    .logout-link {
+      color: #ef4444;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .social-buttons { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 12px 20px;
+      border-radius: 8px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .btn-radio { background-color: #0284c7; }
+    .btn-youtube { background-color: #ff0000; }
+    .btn-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+
+    .verse-card { border-left: 4px solid var(--accent-color); }
+    .verse-text { font-style: italic; margin-bottom: 0.5rem; }
+    .verse-ref { font-size: 0.9rem; color: var(--accent-color); font-weight: 600; text-align: right; display: block; }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: #64748b;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border-color);
+      margin-top: auto;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Capa Oscura y Botón de Salida Modo Cine -->
+  <div id="cinemaOverlay" onclick="toggleCinemaMode()"></div>
+  <button id="btnExitCinema" onclick="toggleCinemaMode()">❌ Salir de Modo Cine</button>
+
+  <!-- Franja/Cuadro Blanco de fondo para la animación de los Aviones -->
+  <div id="planeTrack"></div>
+
+  <header>
+    <div class="logo-container">
+      <img src="avion.gif" alt="Avión Jet">
+      <h1>El Jet del Evangelio Web-Tv</h1>
+    </div>
+    <div class="header-actions">
+      <button id="cinemaToggle" class="action-toggle-btn" onclick="toggleCinemaMode()">
+        <span>🎬</span> <span id="cinemaText">Modo Cine</span>
+      </button>
+      <button id="audioToggle" class="action-toggle-btn">
+        <span>🎧</span> <span id="audioText">Modo Audio</span>
+      </button>
+      <button id="themeToggle" class="action-toggle-btn">
+        <span id="themeIcon">🌙</span> <span id="themeText">Oscuro</span>
+      </button>
+      <span class="live-badge">EN VIVO</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="banner-header">
+      <img src="avion.gif" alt="Avión Jet Animado">
+      <h2>El Jet del Evangelio Web-Tv</h2>
+      <p>Llevando el mensaje de fe, esperanza y alabanza a todas las naciones</p>
+    </div>
+
+    <!-- Alerta en vivo enviada desde Admin -->
+    <div id="adminAlert" class="admin-alert-banner"></div>
+
+    <!-- Reproductor de Video -->
+    <div id="videoContainer" class="media-wrapper video-wrapper">
+      <div id="unmuteOverlay" class="unmute-overlay">
+        <div class="unmute-btn">🔊 Toca para activar sonido</div>
+        <p style="margin-top: 10px;">Toca en cualquier parte para escuchar</p>
+      </div>
+
+      <iframe id="videoIframe" src="https://ok.ru/videoembed/16493078060749?nochat=1&autoplay=1&muted=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+    </div>
+
+    <!-- Indicador Modo Audio -->
+    <div id="audioContainer" class="audio-mode-card">
+      <div style="font-size:3rem; margin-bottom:8px;">🎧</div>
+      <h3 style="color:var(--accent-color);">Escuchando Modo Audio</h3>
+      <p>El reproductor visual está oculto para ahorrar datos.</p>
+    </div>
+
+    <!-- Banner para Activar Notificaciones Push -->
+    <div id="notifyCard" class="notify-card">
+      <p>🔔 <strong>¿Quieres recibir avisos en tu teléfono cuando iniciemos un En Vivo?</strong></p>
+      <button id="btnEnableNotify" class="notify-btn">Activar Notificaciones</button>
+    </div>
+
+    <!-- Ventana de Contadores Ampliada con Gente en Línea -->
+    <div class="counters-window">
+      <div class="counter-box">
+        <h4>🔴 En Línea</h4>
+        <div class="counter-value online-badge-text" id="countOnline">1</div>
+      </div>
+      <div style="width: 1px; height: 35px; background-color: var(--border-color);"></div>
+      <div class="counter-box">
+        <h4>🙌 Amén</h4>
+        <div class="counter-value" id="countAmen">0</div>
+      </div>
+      <div style="width: 1px; height: 35px; background-color: var(--border-color);"></div>
+      <div class="counter-box">
+        <h4><img src="avion.gif" style="width: 18px; height: 18px; vertical-align: middle;"> Jets</h4>
+        <div class="counter-value" id="countJets">0</div>
+      </div>
+    </div>
+
+    <!-- Botones Interactivos -->
+    <div class="interaction-container">
+      <button id="btnAmen" class="action-btn amen-btn">🙌 ¡Decir Amén!</button>
+      <button id="btnPlane" class="action-btn plane-btn">
+        <img src="avion.gif" alt="Jet">
+        <span>Lanzar Jet</span>
+      </button>
+    </div>
+
+    <!-- Sección de Autenticación y Mensajería con Historial de Chat -->
+    <div class="auth-chat-card">
+      <h3>💬 Peticiones de Oración y Saludos</h3>
+
+      <div id="chatHistory" class="chat-history">
+        <p style="opacity: 0.6; text-align: center; font-size: 0.85rem;">Cargando mensajes del chat...</p>
+      </div>
+
+      <div id="authBox" class="auth-box">
+        <p style="font-size:0.9rem; opacity:0.8;">Inicia sesión para enviar tu mensaje en vivo a la transmisión:</p>
+        <button id="btnGoogleLogin" class="google-btn">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="Google">
+          Continuar con Google
+        </button>
+      </div>
+
+      <div id="chatBox" class="chat-box">
+        <div class="user-info-bar">
+          <span id="userName">Hola, Usuario</span>
+          <span id="btnLogout" class="logout-link">Cerrar Sesión</span>
+        </div>
+        <div class="chat-input-group">
+          <textarea id="msgInput" placeholder="Escribe tu saludo o petición de oración..."></textarea>
+          <button id="btnSendMsg">Enviar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h3>Nuestros Canales:</h3>
+      <div class="social-buttons">
+        <a href="https://playstore.stream/app/dcc09dbfcac88017?app-multi=1776608278&instalado=sim" target="_blank" class="social-btn btn-radio">📻 Escuchar Radio Jet</a>
+        <a href="https://www.youtube.com/@radioeljetdelevangelio" target="_blank" class="social-btn btn-youtube">▶️ Canal de YouTube</a>
+        <a href="https://www.instagram.com/carolpaz820" target="_blank" class="social-btn btn-instagram">📸 Instagram</a>
+      </div>
+    </div>
+
+    <div class="info-card verse-card">
+      <h3>📖 Versículo del Día</h3>
+      <p class="verse-text" id="verse-text">Cargando versículo...</p>
+      <span class="verse-ref" id="verse-ref"></span>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2026 El Jet del Evangelio Web-Tv — Todos los derechos reservados.
+  </footer>
+
+  <script>
+    // --- INICIALIZACIÓN DE FIREBASE ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyBBTT3w-gKAnjnylo3MapQrYURMW3eexXs",
+      authDomain: "eljettv-a09f8.firebaseapp.com",
+      databaseURL: "https://eljettv-a09f8-default-rtdb.firebaseio.com",
+      projectId: "eljettv-a09f8",
+      storageBucket: "eljettv-a09f8.firebasestorage.app",
+      messagingSenderId: "1064986191642",
+      appId: "1:1064986191642:web:0d4b87ac0195b27853eea3",
+      measurementId: "G-S6FTGR16K1"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+    const messaging = firebase.messaging();
+
+    let currentUser = null;
+
+    // --- LÓGICA DE MODO CINE ---
+    function toggleCinemaMode() {
+      document.body.classList.toggle('cinema-mode');
+      const isCinema = document.body.classList.contains('cinema-mode');
+      const cinemaBtn = document.getElementById('cinemaToggle');
+      if (cinemaBtn) {
+        cinemaBtn.classList.toggle('active', isCinema);
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.body.classList.contains('cinema-mode')) {
+        toggleCinemaMode();
+      }
+    });
+
+    // --- CONTADOR DE GENTE EN LÍNEA (PRESENCIA REALTIME) ---
+    const connectedRef = db.ref('.info/connected');
+    const onlineUsersRef = db.ref('conectados');
+
+    connectedRef.on('value', snap => {
+      if (snap.val() === true) {
+        const con = onlineUsersRef.push();
+        con.onDisconnect().remove();
+        con.set(true);
+      }
+    });
+
+    onlineUsersRef.on('value', snap => {
+      const count = snap.numChildren() || 1;
+      document.getElementById('countOnline').innerText = count;
+    });
+
+    // --- REGISTRO Y GESTIÓN DE NOTIFICACIONES PWA ---
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').then(reg => {
+        messaging.useServiceWorker(reg);
+      }).catch(err => console.log('SW Error:', err));
+    }
+
+    const btnEnableNotify = document.getElementById('btnEnableNotify');
+    const notifyCard = document.getElementById('notifyCard');
+
+    if (Notification.permission === 'granted') {
+      notifyCard.style.display = 'none';
+    }
+
+    btnEnableNotify.addEventListener('click', () => {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          messaging.getToken({ vapidKey: 'YOUR_VAPID_KEY_IF_NEEDED' }).then(token => {
+            if (token) {
+              db.ref('fcm_tokens/' + token).set(true);
+            }
+          });
+          notifyCard.style.display = 'none';
+          alert('¡Notificaciones activadas con éxito! Te avisaremos al iniciar transmisiones.');
+        }
+      });
+    });
+
+    // --- AUTENTICACIÓN GOOGLE ---
+    document.getElementById('btnGoogleLogin').addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(err => alert("Error al iniciar sesión: " + err.message));
+    });
+
+    document.getElementById('btnLogout').addEventListener('click', () => auth.signOut());
+
+    auth.onAuthStateChanged(user => {
+      currentUser = user;
+      const authBox = document.getElementById('authBox');
+      const chatBox = document.getElementById('chatBox');
+
+      if (user) {
+        authBox.style.display = 'none';
+        chatBox.classList.add('active');
+        document.getElementById('userName').innerText = `👋 Conectado como: ${user.displayName || user.email}`;
+      } else {
+        authBox.style.display = 'flex';
+        chatBox.classList.remove('active');
+      }
+    });
+
+    // --- MENSAJERÍA / CHAT ---
+    document.getElementById('btnSendMsg').addEventListener('click', () => {
+      const input = document.getElementById('msgInput');
+      const texto = input.value.trim();
+      if (!texto || !currentUser) return;
+
+      db.ref('mensajes').push({
+        usuario: currentUser.displayName || 'Anónimo',
+        correo: currentUser.email,
+        mensaje: texto,
+        timestamp: Date.now()
+      }).then(() => {
+        input.value = '';
+      });
+    });
+
+    db.ref('mensajes').on('value', snapshot => {
+      const historyContainer = document.getElementById('chatHistory');
+      historyContainer.innerHTML = '';
+      const data = snapshot.val();
+
+      if (!data) {
+        historyContainer.innerHTML = '<p style="opacity: 0.6; text-align: center; font-size: 0.85rem;">No hay mensajes registrados aún. ¡Sé el primero en enviar uno!</p>';
+        return;
+      }
+
+      Object.keys(data).forEach(key => {
+        const item = data[key];
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'chat-message-item';
+        msgDiv.innerHTML = `<span class="chat-message-author">${item.usuario || 'Anónimo'}:</span> <span>${item.mensaje}</span>`;
+        historyContainer.appendChild(msgDiv);
+      });
+
+      historyContainer.scrollTop = historyContainer.scrollHeight;
+    });
+
+    // --- CONTADORES GLOBALES (AMÉN Y JETS) ---
+    db.ref('contadores').on('value', snapshot => {
+      const data = snapshot.val() || {};
+      document.getElementById('countAmen').innerText = data.amen || 0;
+      document.getElementById('countJets').innerText = data.jets || 0;
+    });
+
+    function incrementarContador(tipo) {
+      db.ref('contadores/' + tipo).transaction(val => (val || 0) + 1);
+    }
+
+    // --- TRANSMISIÓN ESPECIAL ---
+    db.ref('transmision_especial').on('value', snapshot => {
+      const data = snapshot.val();
+      const iframe = document.getElementById('videoIframe');
+      if (!iframe) return;
+
+      if (data && data.activo && data.embedUrl) {
+        let url = data.embedUrl.trim();
+
+        if (url.includes('src=')) {
+          const match = url.match(/src=["']([^"']+)["']/);
+          if (match && match[1]) url = match[1];
+        }
+
+        if (url.includes('youtube.com/watch?v=')) {
+          url = url.replace('watch?v=', 'embed/');
+        } else if (url.includes('youtu.be/')) {
+          url = url.replace('youtu.be/', 'www.youtube.com/embed/');
+        }
+
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = url;
+        url = tempDiv.innerText;
+
+        if (iframe.src !== url) {
+          iframe.src = url;
+        }
+      } else {
+        const defaultUrl = "https://ok.ru/videoembed/16493078060749?nochat=1&autoplay=1";
+        if (iframe.src !== defaultUrl) {
+          iframe.src = defaultUrl;
+        }
+      }
+    });
+
+    // --- ALERTAS DESDE ADMIN ---
+    db.ref('alerta_activa').on('value', snapshot => {
+      const alerta = snapshot.val();
+      const banner = document.getElementById('adminAlert');
+      if (alerta && alerta.texto) {
+        banner.innerText = "📢 " + alerta.texto;
+        banner.style.display = 'block';
+      } else {
+        banner.style.display = 'none';
+      }
+    });
+
+    // --- EFECTOS Y COOLDOWNS ---
+    function lanzarEfectoConfetti() {
+      if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.7 } });
+    }
+
+    function lanzarEfectoJets() {
+      const planeTrack = document.getElementById('planeTrack');
+      planeTrack.classList.add('active');
+
+      for (let i = 0; i < 6; i++) {
+        setTimeout(() => {
+          const plane = document.createElement('div');
+          plane.classList.add('flying-plane');
+          
+          const img = document.createElement('img');
+          img.src = 'avion.gif';
+          img.alt = 'Jet en vuelo';
+          
+          plane.appendChild(img);
+          plane.style.left = `${Math.random() * 80 + 10}%`;
+          document.body.appendChild(plane);
+
+          setTimeout(() => plane.remove(), 2200);
+        }, i * 150);
+      }
+
+      // Ocultar el cuadro blanco cuando finalice el vuelo de los aviones
+      setTimeout(() => {
+        planeTrack.classList.remove('active');
+      }, 3000);
+    }
+
+    const btnAmen = document.getElementById('btnAmen');
+    const btnPlane = document.getElementById('btnPlane');
+
+    function aplicarCooldown(button, originalHTML, segundos) {
+      button.disabled = true;
+      let tiempoRestante = segundos;
+
+      const timer = setInterval(() => {
+        button.innerText = `⏳ Espera ${tiempoRestante}s`;
+        tiempoRestante--;
+
+        if (tiempoRestante < 0) {
+          clearInterval(timer);
+          button.innerHTML = originalHTML;
+          button.disabled = false;
+        }
+      }, 1000);
+    }
+
+    btnAmen.addEventListener('click', () => {
+      lanzarEfectoConfetti();
+      incrementarContador('amen');
+      aplicarCooldown(btnAmen, '🙌 ¡Decir Amén!', 5);
+    });
+
+    btnPlane.addEventListener('click', () => {
+      lanzarEfectoJets();
+      incrementarContador('jets');
+      aplicarCooldown(btnPlane, '<img src="avion.gif" alt="Jet"> <span>Lanzar Jet</span>', 10);
+    });
+
+    document.getElementById('unmuteOverlay').addEventListener('click', function() {
+      this.classList.add('hidden');
+    });
+
+    // --- MODO AUDIO Y TEMA ---
+    const audioToggle = document.getElementById('audioToggle');
+    const videoContainer = document.getElementById('videoContainer');
+    const audioContainer = document.getElementById('audioContainer');
+    let isAudioMode = false;
+
+    audioToggle.addEventListener('click', () => {
+      isAudioMode = !isAudioMode;
+      if (isAudioMode) {
+        videoContainer.style.display = 'none';
+        audioContainer.classList.add('active');
+        audioToggle.classList.add('active');
+      } else {
+        videoContainer.style.display = 'block';
+        audioContainer.classList.remove('active');
+        audioToggle.classList.remove('active');
+      }
+    });
+
+    const themeToggle = document.getElementById('themeToggle');
+    let isLight = false;
+    themeToggle.addEventListener('click', () => {
+      isLight = !isLight;
+      document.body.classList.toggle('light-mode', isLight);
+      document.getElementById('themeIcon').innerText = isLight ? '☀️' : '🌙';
+      document.getElementById('themeText').innerText = isLight ? 'Claro' : 'Oscuro';
+    });
+
+    // --- VERSÍCULO DEL DÍA ---
+    async function cargarVersiculo() {
+      try {
+        const res = await fetch('versiculos.txt');
+        const text = await res.text();
+        const lineas = text.split('\n').filter(l => l.trim().length > 0);
+        const hoy = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+        const [cita, ref] = lineas[(hoy - 1) % lineas.length].split('|');
+        document.getElementById('verse-text').innerText = `"${cita.trim()}"`;
+        document.getElementById('verse-ref').innerText = `— ${ref.trim()}`;
+      } catch (e) {
+        document.getElementById('verse-text').innerText = '"Seguid la paz con todos..."';
+        document.getElementById('verse-ref').innerText = '— Hebreos 12:14';
+      }
+    }
+    cargarVersiculo();
+  </script>
+</body>
+</html>
