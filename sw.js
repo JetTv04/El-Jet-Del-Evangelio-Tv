@@ -1,5 +1,5 @@
 // Service Worker para Notificaciones PWA y Caché del Sitio
-const CACHE_NAME = 'eljet-tv-v2';
+const CACHE_NAME = 'eljet-tv-v3';
 const urlsToCache = [
   './',
   './index.html',
