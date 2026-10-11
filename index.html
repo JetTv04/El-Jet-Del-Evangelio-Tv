@@ -50,6 +50,41 @@
       overflow-x: hidden;
     }
 
+    /* --- ESTILOS DE AVISO PARA NAVEGADOR DE FACEBOOK --- */
+    #fbBrowserWarning {
+      display: none;
+      background: linear-gradient(135deg, #e11d48, #be123c);
+      color: #fff;
+      padding: 12px 16px;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: bold;
+      position: sticky;
+      top: 0;
+      z-index: 100000;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    .fb-open-btn {
+      background-color: #ffffff;
+      color: #be123c;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: opacity 0.2s;
+    }
+
+    .fb-open-btn:hover {
+      opacity: 0.9;
+    }
+
     header {
       background-color: var(--header-bg);
       padding: 1rem 1.5rem;
@@ -582,6 +617,12 @@
 </head>
 <body>
 
+  <!-- Aviso de Navegador Interno (Facebook/Instagram) -->
+  <div id="fbBrowserWarning">
+    <span>⚠️ Estás en el navegador de Facebook. Para ver el video y chatear sin fallos:</span>
+    <button class="fb-open-btn" onclick="abrirNavegadorExterno()">🌐 Abrir en Chrome / Safari</button>
+  </div>
+
   <!-- Capa Oscura y Botón de Salida Modo Cine -->
   <div id="cinemaOverlay" onclick="toggleCinemaMode()"></div>
   <button id="btnExitCinema" onclick="toggleCinemaMode()">❌ Salir de Modo Cine</button>
@@ -735,6 +776,27 @@
   </footer>
 
   <script>
+    // --- DETECCIÓN Y APERTURA FUERA DE FACEBOOK / INSTAGRAM ---
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    const isFacebookOrInstagram = ua.indexOf('FBAN') > -1 || ua.indexOf('FBAV') > -1 || ua.indexOf('Instagram') > -1;
+
+    if (isFacebookOrInstagram) {
+      document.getElementById('fbBrowserWarning').style.display = 'flex';
+    }
+
+    function abrirNavegadorExterno() {
+      const currentUrl = window.location.href;
+      // Intento forzar la apertura mediante intent en Android o esquema universal
+      if (/android/i.test(ua)) {
+        window.location.href = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end;`;
+      } else if (/iphone|ipad|ipod/i.test(ua)) {
+        // En iOS se recomienda abrir los tres puntos de Facebook y seleccionar "Abrir en el navegador"
+        alert('Por favor, toca los tres puntos (...) en la esquina superior y selecciona "Abrir en el navegador" (Safari).');
+      } else {
+        window.open(currentUrl, '_system');
+      }
+    }
+
     // --- INICIALIZACIÓN DE FIREBASE ---
     const firebaseConfig = {
       apiKey: "AIzaSyBBTT3w-gKAnjnylo3MapQrYURMW3eexXs",
