@@ -120,6 +120,83 @@
     .banner-header h2 { font-size: 1.8rem; color: #ffffff; margin-bottom: 0.5rem; }
     .banner-header p { color: #e0f2fe; font-size: 1rem; margin-bottom: 1rem; }
 
+    /* --- ESTILOS DEL TABLÓN TIPO AEROPUERTO --- */
+    .airport-board-wrapper {
+      width: 100%;
+      background-color: #090d16;
+      border: 2px solid #334155;
+      border-radius: 12px;
+      padding: 1.2rem;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+      display: none;
+    }
+
+    .airport-board-wrapper.active {
+      display: block;
+    }
+
+    .airport-board-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px dashed #334155;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+
+    .airport-board-title {
+      color: #38bdf8;
+      font-family: monospace;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .airport-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: monospace;
+    }
+
+    .airport-table th {
+      color: #94a3b8;
+      font-size: 0.75rem;
+      text-align: left;
+      padding: 6px 8px;
+      border-bottom: 1px solid #1e293b;
+      letter-spacing: 0.5px;
+    }
+
+    .airport-table td {
+      padding: 10px 8px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #111827;
+      color: #f8fafc;
+    }
+
+    .board-flip-item {
+      background-color: #111827;
+      color: #f59e0b;
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid #1f2937;
+      font-weight: bold;
+      letter-spacing: 1px;
+      display: inline-block;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.8);
+    }
+
+    .board-status-flight {
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
     .admin-alert-banner {
       display: none;
       width: 100%;
@@ -533,6 +610,32 @@
       <p>Llevando el mensaje de fe, esperanza y alabanza a todas las naciones</p>
     </div>
 
+    <!-- Tablón de Novedades / Horarios de Vuelo estilo Aeropuerto -->
+    <div id="airportBoardContainer" class="airport-board-wrapper">
+      <div class="airport-board-header">
+        <div class="airport-board-title">
+          ✈️ TABLÓN DE DESTINOS Y NOVEDADES — EL JET DEL EVANGELIO
+        </div>
+        <span style="font-family: monospace; font-size: 0.75rem; color: #10b981;">● EN VIVO</span>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="airport-table">
+          <thead>
+            <tr>
+              <th>HORA / VUELO</th>
+              <th>DESTINO / EVENTO</th>
+              <th>ESTADO</th>
+            </tr>
+          </thead>
+          <tbody id="airportBoardBody">
+            <tr>
+              <td colspan="3" style="text-align: center; color: #64748b; font-family: monospace;">Cargando itinerario de vuelos...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Alerta en vivo enviada desde Admin -->
     <div id="adminAlert" class="admin-alert-banner"></div>
 
@@ -682,6 +785,30 @@
     onlineUsersRef.on('value', snap => {
       const count = snap.numChildren() || 1;
       document.getElementById('countOnline').innerText = count;
+    });
+
+    // --- SINCRONIZACIÓN DEL TABLÓN DE NOVEDADES (AEROPUERTO) ---
+    db.ref('tablon_vuelos').on('value', snap => {
+      const data = snap.val();
+      const container = document.getElementById('airportBoardContainer');
+      const tbody = document.getElementById('airportBoardBody');
+      
+      if (data && data.activo && data.items && data.items.length > 0) {
+        container.classList.add('active');
+        tbody.innerHTML = '';
+        
+        data.items.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><span class="board-flip-item">${item.hora || 'AHORA'}</span></td>
+            <td style="font-weight: bold;">${item.destino || 'Sin evento'}</td>
+            <td><span class="board-status-flight">${item.estado || 'EN VIVO'}</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } else {
+        container.classList.remove('active');
+      }
     });
 
     // --- REGISTRO Y GESTIÓN DE NOTIFICACIONES PWA ---
